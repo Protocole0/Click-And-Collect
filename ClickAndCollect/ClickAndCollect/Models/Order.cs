@@ -16,6 +16,13 @@
 			set { _id = value; }
 		}
 
+		private Client _client;
+		public Client Client
+		{
+			get { return _client; }
+			set { _client = value; }
+		}
+
 		private DateTime _orderDate;
 
 		public DateTime OrderDate
@@ -54,6 +61,15 @@
 		{
 			get { return _status; }
 			set { _status = value; }
+		}
+
+		public Order(int id, Client client)
+		{
+			Id = id;
+			Client = client;
+			CratesUsed = 0;
+			CratesReturned = 0;
+			Status = OrderStatus.PENDING_PREPARATION;
 		}
 
 

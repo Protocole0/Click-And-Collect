@@ -23,9 +23,23 @@ namespace ClickAndCollect.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        [HttpPost]
+        public IActionResult Login(string email, string password)
         {
-            return View();
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                ViewBag.ErrorMessage = "Veuillez entrer à la fois le nom d'utilisateur et le mot de passe.";
+                return View();
+            }
+            else if (email == "admin" && password == "password")
+            {
+                return RedirectToAction("Index", "Employee");
+            }
+            else
+            {
+                ViewBag.ErrorMessage = "Nom d'utilisateur ou mot de passe incorrect.";
+                return View();
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

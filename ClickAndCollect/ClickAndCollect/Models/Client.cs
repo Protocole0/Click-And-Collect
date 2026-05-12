@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace ClickAndCollect.Models
 {
@@ -11,6 +12,10 @@ namespace ClickAndCollect.Models
             get { return _id; }
             set { _id = value; }
         }
+
+        public string Firstname { get; set; }
+
+        public string Lastname { get; set; }
 
         private string _email;
 
@@ -29,6 +34,15 @@ namespace ClickAndCollect.Models
         {
             get { return _password; }
             set { _password = value; }
+        }
+
+        public Client(int id, string firstname, string lastname, string email, string password)
+        {
+            Id = id;
+            Firstname = firstname;
+            Lastname = lastname;
+            Email = email;
+            Password = password;
         }
 
     }

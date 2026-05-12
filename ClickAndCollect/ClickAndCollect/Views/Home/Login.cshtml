@@ -1,8 +1,20 @@
-﻿<h1>Connexion à ClickAndCollect</h1>
-<form method="post" class="form-control">
-    <label for="identifiant" class="align-content-center">Identifiant : </label>
-    <input type="text" class="align-content-center" name="identifiant" id="identifiant" placeholder="Nom d'utilisateur ou email" />
-    <br />
-    <br />
-    <button type="submit" class="align-content-lg-center">Se connecter</button>
+﻿<span class="badge text-bg-secondary">Connexion à ClickAndCollect</span>
+<h1>Example heading <span class="badge text-bg-secondary">New</span></h1>
+<form asp-action="Login" method="post" class="form-control">
+    <div class ="input-group mb-3">
+        <label for="email" class="input-group-text">@@</label>
+        <input type="text" class="form-control" name="email" id="email" placeholder="Entrez votre adresse email" />
+    </div>
+    <div class="input-group mb-3">
+        <label for="password" class="input-group-text">Mot de passe : </label>
+        <input type="password" class="form-control" name="password" id="password" placeholder="Minimum 10 caractères" />
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Se connecter</button>
+    </div>
+    
+    @if(ViewBag.ErrorMesage != "")
+    {
+        <h4>@ViewBag.ErrorMessage</h4>
+    }
 </form>

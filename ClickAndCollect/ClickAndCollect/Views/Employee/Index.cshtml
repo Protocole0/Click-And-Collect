@@ -1,0 +1,18 @@
+﻿@model IEnumerable<Order>
+<h1>Préparateur de commande</h1>
+<br />
+<h2 class="text-center">Liste des commandes à préparer pour demain</h2>
+<table class="table align-middle">
+    @foreach(Order orderToPrep in @Model)
+    {
+        <tr>
+            <td><strong>@orderToPrep.Client.Firstname @orderToPrep.Client.Lastname</strong></td>
+        </tr>
+        <tr>
+            <td>ID : @orderToPrep.Id</td>
+        </tr>
+        <tr>
+            <td>Email du client : @orderToPrep.Client.Email</td>
+        </tr>
+    }
+</table>
