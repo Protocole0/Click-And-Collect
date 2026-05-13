@@ -1,0 +1,52 @@
+﻿@model List<ClickAndCollect.Models.Category>
+@{
+    ViewData["Title"] = "Nos catégories";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Nos catégories</h2>
+        <p class="text-muted">Choisissez une catégorie pour découvrir nos produits</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle me-2"></i>Aucune catégorie disponible pour le moment.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var category in Model)
+            {
+                <div class="col">
+                    <a asp-controller="Product" asp-action="Browse" asp-route-id="@category.CategoryId"
+                       class="text-decoration-none">
+                        <div class="card h-100 border-0 shadow-sm card-hover">
+                            <div class="overflow-hidden" style="height:180px;">
+                                <img src="@category.ImageUrl"
+                                     class="card-img-top img-zoom"
+                                     alt="@category.Name"
+                                     style="height:180px; object-fit:cover; width:100%;"
+                                     onerror="this.src='/images/placeholder.png'" />
+                            </div>
+                            <div class="card-body text-center">
+                                <h5 class="card-title fw-bold text-dark mb-1">@category.Name</h5>
+                                @if (!string.IsNullOrEmpty(category.Description))
+                                {
+                                    <p class="card-text text-muted small mb-0">@category.Description</p>
+                                }
+                            </div>
+                            <div class="card-footer bg-white border-0 text-center pb-3">
+                                <span class="text-success small fw-semibold">
+                                    <i class="bi bi-arrow-right-circle me-1"></i>Voir les produits
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+</div>

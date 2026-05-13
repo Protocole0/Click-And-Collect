@@ -1,22 +1,122 @@
+/* ===== BASE ===== */
 html {
-  font-size: 14px;
+    font-size: 15px;
+    scroll-behavior: smooth;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+/* ===== NAVBAR ===== */
+.navbar-brand {
+    letter-spacing: 0.5px;
+}
+
+.navbar .nav-link {
+    font-size: 0.92rem;
+    transition: color 0.2s;
+}
+
+    .navbar .nav-link:hover {
+        color: #28a745 !important;
+    }
+
+/* ===== HERO ===== */
+.hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 480px;
+}
+
+/* ===== CARDS ===== */
+.card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12) !important;
+    }
+
+.img-zoom {
+    transition: transform 0.35s ease;
+}
+
+.card-hover:hover .img-zoom {
+    transform: scale(1.07);
+}
+
+/* ===== FEATURE CARDS ===== */
+.feature-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    }
+
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== MODAL ===== */
+.modal-content {
+    border-radius: 16px;
+}
+
+.modal-header {
+    padding: 1.25rem 1.5rem 0.5rem;
+}
+
+.modal-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    font-size: 0.875rem;
+}
+
+/* ===== FOOTER ===== */
+footer a:hover {
+    color: #28a745 !important;
+    text-decoration: underline !important;
+}
+
+/* ===== FOCUS ===== */
+.btn:focus, .form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
 }

@@ -1,0 +1,109 @@
+﻿@model List<ClickAndCollect.Models.Product>
+@{
+    ViewData["Title"] = "Produits";
+}
+
+<div class="container py-5">
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-success">
+                    <i class="bi bi-house me-1"></i>Accueil
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a asp-controller="Product" asp-action="Index" class="text-decoration-none text-success">Catégories</a>
+            </li>
+            <li class="breadcrumb-item active">Produits</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Produits</h2>
+        <span class="text-muted small">@Model.Count produit(s)</span>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle me-2"></i>Aucun produit disponible dans cette catégorie.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var product in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm card-hover">
+                        <div class="overflow-hidden" style="height:180px;">
+                            <img src="@product.ImageUrl"
+                                 class="card-img-top img-zoom product-img"
+                                 alt="@product.Name"
+                                 style="height:180px; object-fit:cover; width:100%; cursor:pointer;"
+                                 data-id="@product.ProductId"
+                                 onerror="this.src='/images/placeholder.png'" />
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold mb-1">
+                                <a href="#" class="text-decoration-none text-dark product-link"
+                                   data-id="@product.ProductId">@product.Name</a>
+                            </h6>
+                            @if (!string.IsNullOrEmpty(product.Description))
+                            {
+                                <p class="card-text text-muted small mb-0">@product.Description</p>
+                            }
+                        </div>
+                        <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center pb-3">
+                            <span class="fw-bold text-success fs-6">@product.Price.ToString("0.00") €</span>
+                            <button class="btn btn-success btn-sm product-link" data-id="@product.ProductId">
+                                <i class="bi bi-plus-lg me-1"></i>Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal produit -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="productModalLabel">Détails du produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body pt-2" id="productModalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.product-link, .product-img').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                var id = this.dataset.id;
+                var modal = new bootstrap.Modal(document.getElementById('productModal'));
+                var body = document.getElementById('productModalBody');
+
+                body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
+                modal.show();
+
+                fetch('/Product/Details/' + id, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function (r) { return r.text(); })
+                .then(function (html) { body.innerHTML = html; })
+                .catch(function () { body.innerHTML = '<p class="text-danger text-center"><i class="bi bi-exclamation-triangle me-2"></i>Erreur lors du chargement.</p>'; });
+            });
+        });
+    </script>
+}
