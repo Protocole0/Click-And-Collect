@@ -68,18 +68,6 @@
     }
 </div>
 
-<!-- Toast confirmation panier -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1100;">
-    <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body">
-                <i class="bi bi-check-circle-fill me-2"></i>Produit ajouté au panier !
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
-        </div>
-    </div>
-</div>
-
 <!-- Toast confirmation ajout panier -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1100;">
     <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -101,7 +89,7 @@
                 <h5 class="modal-title fw-bold" id="productModalLabel">Détails du produit</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
-            <div class="moDAL-body pt-2" id="productMoDALBody">
+            <div class="modal-body pt-2" id="productModalBody">
                 <div class="text-center py-4">
                     <div class="spinner-border text-success" role="status"></div>
                 </div>
@@ -116,8 +104,8 @@
             el.addEventListener('click', function (e) {
                 e.preventDefault();
                 var id = this.dataset.id;
-                var moDAL = new bootstrap.MoDAL(document.getElementById('productMoDAL'));
-                var body = document.getElementById('productMoDALBody');
+                var moDAL = new bootstrap.Modal(document.getElementById('productModal'));
+                var body = document.getElementById('productModalBody');
 
                 body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
                 moDAL.show();

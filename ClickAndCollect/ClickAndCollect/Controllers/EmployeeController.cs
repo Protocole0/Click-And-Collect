@@ -9,12 +9,12 @@ namespace ClickAndCollect.Controllers
     public class EmployeeController : Controller
     {
         private readonly IOrderDAL _orderDAL;
+
         public EmployeeController(IOrderDAL orderDAL)
         {
             _orderDAL = orderDAL;
         }
-        public async Task<IActionResult> Index()
-        {
+        public async Task<IActionResult> Index() {
             List<Order> orders = await Order.GetAllOrdersAsync(_orderDAL, OrderStatus.PENDING_PREPARATION);
 
             return View(orders);

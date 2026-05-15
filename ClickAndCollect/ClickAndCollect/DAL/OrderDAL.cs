@@ -103,7 +103,7 @@ namespace ClickAndCollect.DAL
                             reader.GetInt32(quantityOrd),
                             product
                             );
-                        order.OrderLines.Add(orderLine);
+                        order.Lines.Add(orderLine);
                     }
                 }
             }

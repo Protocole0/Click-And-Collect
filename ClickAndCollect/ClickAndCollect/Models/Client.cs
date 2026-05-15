@@ -11,6 +11,11 @@ namespace ClickAndCollect.Models
 
         public string PhoneNumber { get; set; }
 
+        public Client()
+        {
+            
+        }
+
         public Client(int id, string firstname, string lastname, string email, string password, string phoneNumber): base(id, email, password)
         {
             Firstname = firstname;

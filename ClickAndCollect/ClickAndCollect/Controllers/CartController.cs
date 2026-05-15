@@ -6,12 +6,12 @@ namespace ClickAndCollect.Controllers
 {
     public class CartController : Controller
     {
-        private readonly IProductDal _productDal;
+        private readonly IProductDAL _productDAL;
         private const string SessionKeyProducts = "products_browse";
 
-        public CartController(IProductDal productDal)
+        public CartController(IProductDAL productDAL)
         {
-            _productDal = productDal;
+            _productDAL = productDAL;
         }
 
         public IActionResult Index()
@@ -24,7 +24,7 @@ namespace ClickAndCollect.Controllers
         public async Task<IActionResult> Add(int productId, int quantity)
         {
             Product? product = Product.GetFromSession(productId, HttpContext.Session, SessionKeyProducts);
-            if (product == null) product = await Product.GetById(productId, _productDal);
+            if (product == null) product = await Product.GetById(productId, _productDAL);
             if (product == null) return NotFound();
 
             Order cart = Order.GetFromSession(HttpContext.Session);
@@ -45,10 +45,10 @@ namespace ClickAndCollect.Controllers
 
             return Json(new
             {
-                success    = true,
-                cartCount  = cart.TotalItems(),
-                subTotal   = cart.TotalAmount().ToString("0.00"),
-                total      = (cart.TotalAmount() + Order.ServiceFee).ToString("0.00")
+                success   = true,
+                cartCount = cart.TotalItems(),
+                subTotal  = cart.TotalAmount().ToString("0.00"),
+                total     = (cart.TotalAmount() + Order.DefaultServiceFee).ToString("0.00")
             });
         }
 
@@ -59,14 +59,14 @@ namespace ClickAndCollect.Controllers
             cart.RemoveLine(productId);
             cart.SaveToSession(HttpContext.Session);
 
-            decimal fee = cart.Lines.Any() ? Order.ServiceFee : 0m;
+            decimal serviceFee = cart.Lines.Any() ? Order.DefaultServiceFee : 0m;
             return Json(new
             {
                 success   = true,
                 cartCount = cart.TotalItems(),
                 isEmpty   = !cart.Lines.Any(),
                 subTotal  = cart.TotalAmount().ToString("0.00"),
-                total     = (cart.TotalAmount() + fee).ToString("0.00")
+                total     = (cart.TotalAmount() + serviceFee).ToString("0.00")
             });
         }
     }
