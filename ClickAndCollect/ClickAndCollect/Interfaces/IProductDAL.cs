@@ -4,7 +4,8 @@ namespace ClickAndCollect.Interfaces
 {
     public interface IProductDal
     {
-        List<Product> GetByCategoryId(int categoryId);
-        Product? GetById(int id);
+        Task<List<Product>> GetByCategoryIdAsync(int categoryId);
+
+        Task<Product?> GetByIdAsync(int id);
     }
 }

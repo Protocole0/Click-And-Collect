@@ -57,10 +57,13 @@ namespace ClickAndCollect.Models
             set { _categoryId = value; }
         }
 
+        // Délègue à l'objet Category — pas de duplication de données
+        public string? CategoryName => _category?.Name;
+
         public Product() { _name = string.Empty; }
 
         public Product(int productId, string name, string? description, decimal price,
-                       string? imageUrl, string? nutritionalInfo, int categoryId)
+                       string? imageUrl, string? nutritionalInfo, int categoryId, Category? category = null)
         {
             _productId       = productId;
             _name            = name;
@@ -69,18 +72,19 @@ namespace ClickAndCollect.Models
             _imageUrl        = imageUrl;
             _nutritionalInfo = nutritionalInfo;
             _categoryId      = categoryId;
+            _category        = category;
         }
 
         // --- Méthodes statiques : la classe délègue au DAL ---
 
-        public static List<Product> GetByCategoryId(int categoryId, IProductDal productDal)
+        public static async Task<List<Product>> GetByCategoryId(int categoryId, IProductDal productDal)
         {
-            return productDal.GetByCategoryId(categoryId);
+            return await productDal.GetByCategoryIdAsync(categoryId);
         }
 
-        public static Product? GetById(int id, IProductDal productDal)
+        public static async Task<Product?>GetById(int id, IProductDal productDal)
         {
-            return productDal.GetById(id);
+            return await productDal.GetByIdAsync(id);
         }
 
         // Parcourt la liste en session et retourne le produit correspondant à l'id
@@ -96,10 +100,10 @@ namespace ClickAndCollect.Models
 
         // --- Méthode d'instance : l'objet Product communique avec la classe Category ---
 
-        public void LoadCategory(ICategoryDal categoryDal)
+        public async Task LoadCategoryAsync(ICategoryDal categoryDal)
         {
-            List<Category> all = Category.GetAll(categoryDal);
-            _category = all.FirstOrDefault(c => c.CategoryId == this._categoryId);
+            List<Category> all = await Category.GetAll(categoryDal);
+            _category = all.FirstOrDefault(c => c.CategoryId == _categoryId);
         }
 
         public Category GetCategory()

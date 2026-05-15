@@ -68,6 +68,31 @@
     }
 </div>
 
+<!-- Toast confirmation panier -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1100;">
+    <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle-fill me-2"></i>Produit ajouté au panier !
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast confirmation ajout panier -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1100;">
+    <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold">
+                <i class="bi bi-check-circle me-2"></i>Produit ajouté au panier !
+                <a asp-controller="Cart" asp-action="Index" class="text-white ms-2 fw-bold">Voir le panier →</a>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal produit -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -101,7 +126,64 @@
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(function (r) { return r.text(); })
-                .then(function (html) { body.innerHTML = html; })
+                .then(function (html) {
+                    body.innerHTML = html;
+
+                    // bind quantity buttons
+                    var btnMinus = body.querySelector('#btn-minus');
+                    var btnPlus  = body.querySelector('#btn-plus');
+                    var qtyInput = body.querySelector('#quantity');
+                    var btnCart  = body.querySelector('#btn-add-cart');
+
+                    function updateCartBtnLabel() {
+                        if (!btnCart) return;
+                        var unitPrice = parseFloat(btnCart.dataset.unitPrice) || 0;
+                        var total = (unitPrice * (parseInt(qtyInput.value) || 1)).toFixed(2).replace('.', ',');
+                        btnCart.innerHTML = '<i class="bi bi-cart3 me-2"></i>Ajouter au panier — ' + total + ' €';
+                    }
+
+                    if (btnMinus) {
+                        btnMinus.addEventListener('click', function () {
+                            if (parseInt(qtyInput.value) > 1)
+                                qtyInput.value = parseInt(qtyInput.value) - 1;
+                            updateCartBtnLabel();
+                        });
+                    }
+                    if (btnPlus) {
+                        btnPlus.addEventListener('click', function () {
+                            qtyInput.value = parseInt(qtyInput.value) + 1;
+                            updateCartBtnLabel();
+                        });
+                    }
+                    if (qtyInput) {
+                        qtyInput.addEventListener('input', updateCartBtnLabel);
+                    }
+
+                    // bind add-to-cart button
+                    if (btnCart) {
+                        btnCart.addEventListener('click', function () {
+                            var productId = this.dataset.productId;
+                            var quantity  = parseInt(qtyInput.value) || 1;
+
+                            fetch('/Cart/Add', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'productId=' + productId + '&quantity=' + quantity
+                            })
+                            .then(function (r) { return r.json(); })
+                            .then(function (data) {
+                                if (data.success) {
+                                    var badge = document.getElementById('cart-badge');
+                                    if (badge) badge.textContent = data.cartCount;
+
+                                    bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+
+                                    new bootstrap.Toast(document.getElementById('cartToast'), { delay: 3000 }).show();
+                                }
+                            });
+                        });
+                    }
+                })
                 .catch(function () { body.innerHTML = '<p class="text-danger text-center"><i class="bi bi-exclamation-triangle me-2"></i>Erreur lors du chargement.</p>'; });
             });
         });

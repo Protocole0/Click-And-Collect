@@ -44,16 +44,16 @@ namespace ClickAndCollect.Models
 
         // --- Méthode statique : la classe Category délègue au DAL ---
 
-        public static List<Category> GetAll(ICategoryDal categoryDal)
+        public static async Task<List<Category>> GetAll(ICategoryDal categoryDal)
         {
-            return categoryDal.GetAll();
+            return await categoryDal.GetAllAsync();
         }
 
         // --- Méthode d'instance : l'objet Category communique avec la classe Product ---
 
-        public void LoadProducts(IProductDal productDal)
+        public async Task LoadProductsAsync(IProductDal productDal)
         {
-            _products = Product.GetByCategoryId(this._categoryId, productDal);
+            _products = await Product.GetByCategoryId(_categoryId, productDal);
         }
 
         public List<Product> GetProducts()
