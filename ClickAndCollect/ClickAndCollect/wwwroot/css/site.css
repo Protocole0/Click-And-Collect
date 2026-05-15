@@ -75,15 +75,15 @@ body {
 }
 
 /* ===== MODAL ===== */
-.modal-content {
+.moDAL-content {
     border-radius: 16px;
 }
 
-.modal-header {
+.moDAL-header {
     padding: 1.25rem 1.5rem 0.5rem;
 }
 
-.modal-body {
+.moDAL-body {
     padding: 1.25rem 1.5rem 1.5rem;
 }
 

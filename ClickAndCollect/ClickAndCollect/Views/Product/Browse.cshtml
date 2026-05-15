@@ -101,7 +101,7 @@
                 <h5 class="modal-title fw-bold" id="productModalLabel">Détails du produit</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
-            <div class="modal-body pt-2" id="productModalBody">
+            <div class="moDAL-body pt-2" id="productMoDALBody">
                 <div class="text-center py-4">
                     <div class="spinner-border text-success" role="status"></div>
                 </div>
@@ -116,11 +116,11 @@
             el.addEventListener('click', function (e) {
                 e.preventDefault();
                 var id = this.dataset.id;
-                var modal = new bootstrap.Modal(document.getElementById('productModal'));
-                var body = document.getElementById('productModalBody');
+                var moDAL = new bootstrap.MoDAL(document.getElementById('productMoDAL'));
+                var body = document.getElementById('productMoDALBody');
 
                 body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
-                modal.show();
+                moDAL.show();
 
                 fetch('/Product/Details/' + id, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }

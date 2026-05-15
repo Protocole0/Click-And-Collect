@@ -2,7 +2,7 @@ using ClickAndCollect.Models;
 
 namespace ClickAndCollect.Interfaces
 {
-    public interface IProductDal
+    public interface IProductDAL
     {
         Task<List<Product>> GetByCategoryIdAsync(int categoryId);
 

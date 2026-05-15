@@ -21,8 +21,8 @@
             @foreach (var category in Model)
             {
                 <div class="col">
-                    <a asp-controller="Product" asp-action="Browse" asp-route-id="@category.CategoryId"
-                       class="text-decoration-none">
+                    <a asp-controller="#" asp-action="Browse" asp-route-id="@category.CategoryId"
+                       class="text-decoration-none text-dark product-link">
                         <div class="card h-100 border-0 shadow-sm card-hover">
                             <div class="overflow-hidden" style="height:180px;">
                                 <img src="@category.ImageUrl"

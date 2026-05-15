@@ -7,15 +7,15 @@ namespace ClickAndCollect.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ICategoryDal _categoryDal;
-        private readonly IProductDal _productDal;
+        private readonly ICategoryDAL _categoryDAL;
+        private readonly IProductDAL _productDAL;
 
         private const string SessionKeyProducts = "products_browse";
 
-        public ProductController(ICategoryDal categoryDal, IProductDal productDal)
+        public ProductController(ICategoryDAL categoryDAL, IProductDAL productDAL)
         {
-            _categoryDal = categoryDal;
-            _productDal  = productDal;
+            _categoryDAL = categoryDAL;
+            _productDAL  = productDAL;
         }
 
         // UC-3 : Select Category — 1 appel BD

@@ -42,6 +42,12 @@ namespace ClickAndCollect.Models
             _description = description;
         }
 
+        // Constructor just to have the category name in the order picker order preview
+        public Category(string name)
+        {
+            Name = name;
+        }
+
         // --- Méthode statique : la classe Category délègue au DAL ---
 
         public static async Task<List<Category>> GetAll(ICategoryDal categoryDal)

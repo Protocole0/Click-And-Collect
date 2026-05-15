@@ -15,8 +15,9 @@ builder.Services.AddSession(options =>
 
 string connectionString = builder.Configuration.GetConnectionString("Default")!;
 
-builder.Services.AddTransient<ICategoryDal>(_ => new CategoryDal(connectionString));
-builder.Services.AddTransient<IProductDal>(_ => new ProductDal(connectionString));
+builder.Services.AddTransient<ICategoryDAL>(_ => new CategoryDAL(connectionString));
+builder.Services.AddTransient<IProductDAL>(_ => new ProductDAL(connectionString));
+builder.Services.AddTransient<IOrderDAL>(_ => new OrderDAL(connectionString));
 
 var app = builder.Build();
 

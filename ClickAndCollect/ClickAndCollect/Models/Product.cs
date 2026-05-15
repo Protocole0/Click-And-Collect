@@ -59,6 +59,14 @@ namespace ClickAndCollect.Models
 
         // Délègue à l'objet Category — pas de duplication de données
         public string? CategoryName => _category?.Name;
+        // Constructor to view the category name
+        // in the order picker order preview
+        public Product(string name, string imageUrl, Category category)
+        {
+            Name = name;
+            ImageUrl = imageUrl;
+            _category = category;
+        }
 
         public Product() { _name = string.Empty; }
 
@@ -112,5 +120,5 @@ namespace ClickAndCollect.Models
                 throw new InvalidOperationException("La catégorie n'est pas chargée. Appelez LoadCategory() d'abord.");
             return _category;
         }
-    }
+    }  
 }
