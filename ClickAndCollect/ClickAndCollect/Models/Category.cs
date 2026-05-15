@@ -34,6 +34,8 @@ namespace ClickAndCollect.Models
             set { _description = value; }
         }
 
+        public Category() { _name = string.Empty; }
+
         public Category(int categoryId, string name, string? imageUrl, string? description)
         {
             _categoryId  = categoryId;

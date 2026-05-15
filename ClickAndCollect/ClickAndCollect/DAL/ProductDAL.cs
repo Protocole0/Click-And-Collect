@@ -38,6 +38,7 @@ namespace ClickAndCollect.DAL
                     int categoryIdOrd   = reader.GetOrdinal("category_id");
                     int categoryNameOrd = reader.GetOrdinal("category_name");
 
+
                     while (await reader.ReadAsync())
                     {
                         var category = new Category(
@@ -52,7 +53,6 @@ namespace ClickAndCollect.DAL
                             reader.GetDecimal(priceOrd),
                             reader.IsDBNull(imageUrlOrd)    ? null : reader.GetString(imageUrlOrd),
                             reader.IsDBNull(nutritionalOrd) ? null : reader.GetString(nutritionalOrd),
-                            reader.GetInt32(categoryIdOrd),
                             category));
                     }
                 }
@@ -87,6 +87,7 @@ namespace ClickAndCollect.DAL
                     int categoryIdOrd   = reader.GetOrdinal("category_id");
                     int categoryNameOrd = reader.GetOrdinal("category_name");
 
+
                     if (await reader.ReadAsync())
                     {
                         var category = new Category(
@@ -101,7 +102,6 @@ namespace ClickAndCollect.DAL
                             reader.GetDecimal(priceOrd),
                             reader.IsDBNull(imageUrlOrd)    ? null : reader.GetString(imageUrlOrd),
                             reader.IsDBNull(nutritionalOrd) ? null : reader.GetString(nutritionalOrd),
-                            reader.GetInt32(categoryIdOrd),
                             category);
                     }
                 }
