@@ -42,18 +42,24 @@ namespace ClickAndCollect.Models
             _description = description;
         }
 
+        // Constructor just to have the category name in the order picker order preview
+        public Category(string name)
+        {
+            Name = name;
+        }
+
         // --- Méthode statique : la classe Category délègue au DAL ---
 
-        public static List<Category> GetAll(ICategoryDal categoryDal)
+        public static List<Category> GetAll(ICategoryDAL categoryDAL)
         {
-            return categoryDal.GetAll();
+            return categoryDAL.GetAll();
         }
 
         // --- Méthode d'instance : l'objet Category communique avec la classe Product ---
 
-        public void LoadProducts(IProductDal productDal)
+        public void LoadProducts(IProductDAL productDAL)
         {
-            _products = Product.GetByCategoryId(this._categoryId, productDal);
+            _products = Product.GetByCategoryId(this._categoryId, productDAL);
         }
 
         public List<Product> GetProducts()

@@ -4,11 +4,11 @@ using Microsoft.Data.SqlClient;
 
 namespace ClickAndCollect.DAL
 {
-    public class ProductDal : IProductDal
+    public class ProductDAL : IProductDAL
     {
         private readonly string _connectionString;
 
-        public ProductDal(string connectionString)
+        public ProductDAL(string connectionString)
         {
             _connectionString = connectionString;
         }

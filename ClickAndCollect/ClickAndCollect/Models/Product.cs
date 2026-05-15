@@ -57,6 +57,15 @@ namespace ClickAndCollect.Models
             set { _categoryId = value; }
         }
 
+        // Constructor to view the category name
+        // in the order picker order preview
+        public Product(string name, string imageUrl, Category category)
+        {
+            Name = name;
+            ImageUrl = imageUrl;
+            _category = category;
+        }
+
         public Product() { _name = string.Empty; }
 
         public Product(int productId, string name, string? description, decimal price,
@@ -73,14 +82,14 @@ namespace ClickAndCollect.Models
 
         // --- Méthodes statiques : la classe délègue au DAL ---
 
-        public static List<Product> GetByCategoryId(int categoryId, IProductDal productDal)
+        public static List<Product> GetByCategoryId(int categoryId, IProductDAL productDAL)
         {
-            return productDal.GetByCategoryId(categoryId);
+            return productDAL.GetByCategoryId(categoryId);
         }
 
-        public static Product? GetById(int id, IProductDal productDal)
+        public static Product? GetById(int id, IProductDAL productDAL)
         {
-            return productDal.GetById(id);
+            return productDAL.GetById(id);
         }
 
         // Parcourt la liste en session et retourne le produit correspondant à l'id
@@ -96,9 +105,9 @@ namespace ClickAndCollect.Models
 
         // --- Méthode d'instance : l'objet Product communique avec la classe Category ---
 
-        public void LoadCategory(ICategoryDal categoryDal)
+        public void LoadCategory(ICategoryDAL categoryDAL)
         {
-            List<Category> all = Category.GetAll(categoryDal);
+            List<Category> all = Category.GetAll(categoryDAL);
             _category = all.FirstOrDefault(c => c.CategoryId == this._categoryId);
         }
 
@@ -108,5 +117,5 @@ namespace ClickAndCollect.Models
                 throw new InvalidOperationException("La catégorie n'est pas chargée. Appelez LoadCategory() d'abord.");
             return _category;
         }
-    }
+    }  
 }

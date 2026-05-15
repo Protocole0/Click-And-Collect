@@ -7,28 +7,28 @@ namespace ClickAndCollect.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ICategoryDal _categoryDal;
-        private readonly IProductDal _productDal;
+        private readonly ICategoryDAL _categoryDAL;
+        private readonly IProductDAL _productDAL;
 
         private const string SessionKeyProducts = "products_browse";
 
-        public ProductController(ICategoryDal categoryDal, IProductDal productDal)
+        public ProductController(ICategoryDAL categoryDAL, IProductDAL productDAL)
         {
-            _categoryDal = categoryDal;
-            _productDal  = productDal;
+            _categoryDAL = categoryDAL;
+            _productDAL  = productDAL;
         }
 
         // UC-3 : Select Category — 1 appel BD
         public IActionResult Index()
         {
-            List<Category> categories = Category.GetAll(_categoryDal);
+            List<Category> categories = Category.GetAll(_categoryDAL);
             return View(categories);
         }
 
         // UC-4 : Browse Product — 1 appel BD + stockage en session
         public IActionResult Browse(int id)
         {
-            List<Product> products = Product.GetByCategoryId(id, _productDal);
+            List<Product> products = Product.GetByCategoryId(id, _productDAL);
 
             HttpContext.Session.SetString(SessionKeyProducts, JsonSerializer.Serialize(products));
 
@@ -41,7 +41,7 @@ namespace ClickAndCollect.Controllers
             Product? product = Product.GetFromSession(id, HttpContext.Session, SessionKeyProducts);
 
             if (product == null)
-                product = Product.GetById(id, _productDal);
+                product = Product.GetById(id, _productDAL);
 
             if (product == null)
                 return NotFound();

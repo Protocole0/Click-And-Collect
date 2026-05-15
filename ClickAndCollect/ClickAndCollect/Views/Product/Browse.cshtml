@@ -68,15 +68,15 @@
     }
 </div>
 
-<!-- Modal produit -->
-<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="productModalLabel">Détails du produit</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+<!-- MoDAL produit -->
+<div class="moDAL fade" id="productMoDAL" tabindex="-1" aria-labelledby="productMoDALLabel" aria-hidden="true">
+    <div class="moDAL-dialog moDAL-lg moDAL-dialog-centered">
+        <div class="moDAL-content border-0 shadow">
+            <div class="moDAL-header border-0 pb-0">
+                <h5 class="moDAL-title fw-bold" id="productMoDALLabel">Détails du produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="moDAL" aria-label="Fermer"></button>
             </div>
-            <div class="modal-body pt-2" id="productModalBody">
+            <div class="moDAL-body pt-2" id="productMoDALBody">
                 <div class="text-center py-4">
                     <div class="spinner-border text-success" role="status"></div>
                 </div>
@@ -91,11 +91,11 @@
             el.addEventListener('click', function (e) {
                 e.preventDefault();
                 var id = this.dataset.id;
-                var modal = new bootstrap.Modal(document.getElementById('productModal'));
-                var body = document.getElementById('productModalBody');
+                var moDAL = new bootstrap.MoDAL(document.getElementById('productMoDAL'));
+                var body = document.getElementById('productMoDALBody');
 
                 body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
-                modal.show();
+                moDAL.show();
 
                 fetch('/Product/Details/' + id, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }

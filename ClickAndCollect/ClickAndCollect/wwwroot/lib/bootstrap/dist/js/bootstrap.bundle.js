@@ -4271,7 +4271,7 @@
    * --------------------------------------------------------------------------
    */
   const Default$7 = {
-    className: 'modal-backdrop',
+    className: 'moDAL-backdrop',
     isVisible: true,
     // if false, we use the backdrop helper without adding any element to the dom
     isAnimated: false,
@@ -4493,7 +4493,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap (v5.1.0): modal.js
+   * Bootstrap (v5.1.0): moDAL.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -4503,8 +4503,8 @@
    * ------------------------------------------------------------------------
    */
 
-  const NAME$6 = 'modal';
-  const DATA_KEY$6 = 'bs.modal';
+  const NAME$6 = 'moDAL';
+  const DATA_KEY$6 = 'bs.moDAL';
   const EVENT_KEY$6 = `.${DATA_KEY$6}`;
   const DATA_API_KEY$3 = '.data-api';
   const ESCAPE_KEY$1 = 'Escape';
@@ -4529,20 +4529,20 @@
   const EVENT_MOUSEUP_DISMISS = `mouseup.dismiss${EVENT_KEY$6}`;
   const EVENT_MOUSEDOWN_DISMISS = `mousedown.dismiss${EVENT_KEY$6}`;
   const EVENT_CLICK_DATA_API$2 = `click${EVENT_KEY$6}${DATA_API_KEY$3}`;
-  const CLASS_NAME_OPEN = 'modal-open';
+  const CLASS_NAME_OPEN = 'moDAL-open';
   const CLASS_NAME_FADE$3 = 'fade';
   const CLASS_NAME_SHOW$4 = 'show';
-  const CLASS_NAME_STATIC = 'modal-static';
-  const SELECTOR_DIALOG = '.modal-dialog';
-  const SELECTOR_MODAL_BODY = '.modal-body';
-  const SELECTOR_DATA_TOGGLE$2 = '[data-bs-toggle="modal"]';
+  const CLASS_NAME_STATIC = 'moDAL-static';
+  const SELECTOR_DIALOG = '.moDAL-dialog';
+  const SELECTOR_MODAL_BODY = '.moDAL-body';
+  const SELECTOR_DATA_TOGGLE$2 = '[data-bs-toggle="moDAL"]';
   /**
    * ------------------------------------------------------------------------
    * Class Definition
    * ------------------------------------------------------------------------
    */
 
-  class Modal extends BaseComponent {
+  class MoDAL extends BaseComponent {
     constructor(element, config) {
       super(element);
       this._config = this._getConfig(config);
@@ -4639,7 +4639,7 @@
       EventHandler.off(this._element, EVENT_CLICK_DISMISS);
       EventHandler.off(this._dialog, EVENT_MOUSEDOWN_DISMISS);
 
-      this._queueCallback(() => this._hideModal(), this._element, isAnimated);
+      this._queueCallback(() => this._hideMoDAL(), this._element, isAnimated);
     }
 
     dispose() {
@@ -4683,10 +4683,10 @@
     _showElement(relatedTarget) {
       const isAnimated = this._isAnimated();
 
-      const modalBody = SelectorEngine.findOne(SELECTOR_MODAL_BODY, this._dialog);
+      const moDALBody = SelectorEngine.findOne(SELECTOR_MODAL_BODY, this._dialog);
 
       if (!this._element.parentNode || this._element.parentNode.nodeType !== Node.ELEMENT_NODE) {
-        // Don't move modal's DOM position
+        // Don't move moDAL's DOM position
         document.body.append(this._element);
       }
 
@@ -4694,14 +4694,14 @@
 
       this._element.removeAttribute('aria-hidden');
 
-      this._element.setAttribute('aria-modal', true);
+      this._element.setAttribute('aria-moDAL', true);
 
       this._element.setAttribute('role', 'dialog');
 
       this._element.scrollTop = 0;
 
-      if (modalBody) {
-        modalBody.scrollTop = 0;
+      if (moDALBody) {
+        moDALBody.scrollTop = 0;
       }
 
       if (isAnimated) {
@@ -4747,12 +4747,12 @@
       }
     }
 
-    _hideModal() {
+    _hideMoDAL() {
       this._element.style.display = 'none';
 
       this._element.setAttribute('aria-hidden', true);
 
-      this._element.removeAttribute('aria-modal');
+      this._element.removeAttribute('aria-moDAL');
 
       this._element.removeAttribute('role');
 
@@ -4806,13 +4806,13 @@
         scrollHeight,
         style
       } = this._element;
-      const isModalOverflowing = scrollHeight > document.documentElement.clientHeight; // return if the following background transition hasn't yet completed
+      const isMoDALOverflowing = scrollHeight > document.documentElement.clientHeight; // return if the following background transition hasn't yet completed
 
-      if (!isModalOverflowing && style.overflowY === 'hidden' || classList.contains(CLASS_NAME_STATIC)) {
+      if (!isMoDALOverflowing && style.overflowY === 'hidden' || classList.contains(CLASS_NAME_STATIC)) {
         return;
       }
 
-      if (!isModalOverflowing) {
+      if (!isMoDALOverflowing) {
         style.overflowY = 'hidden';
       }
 
@@ -4821,7 +4821,7 @@
       this._queueCallback(() => {
         classList.remove(CLASS_NAME_STATIC);
 
-        if (!isModalOverflowing) {
+        if (!isMoDALOverflowing) {
           this._queueCallback(() => {
             style.overflowY = '';
           }, this._dialog);
@@ -4830,22 +4830,22 @@
 
       this._element.focus();
     } // ----------------------------------------------------------------------
-    // the following methods are used to handle overflowing modals
+    // the following methods are used to handle overflowing moDALs
     // ----------------------------------------------------------------------
 
 
     _adjustDialog() {
-      const isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
+      const isMoDALOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
 
       const scrollbarWidth = this._scrollBar.getWidth();
 
       const isBodyOverflowing = scrollbarWidth > 0;
 
-      if (!isBodyOverflowing && isModalOverflowing && !isRTL() || isBodyOverflowing && !isModalOverflowing && isRTL()) {
+      if (!isBodyOverflowing && isMoDALOverflowing && !isRTL() || isBodyOverflowing && !isMoDALOverflowing && isRTL()) {
         this._element.style.paddingLeft = `${scrollbarWidth}px`;
       }
 
-      if (isBodyOverflowing && !isModalOverflowing && !isRTL() || !isBodyOverflowing && isModalOverflowing && isRTL()) {
+      if (isBodyOverflowing && !isMoDALOverflowing && !isRTL() || !isBodyOverflowing && isMoDALOverflowing && isRTL()) {
         this._element.style.paddingRight = `${scrollbarWidth}px`;
       }
     }
@@ -4858,7 +4858,7 @@
 
     static jQueryInterface(config, relatedTarget) {
       return this.each(function () {
-        const data = Modal.getOrCreateInstance(this, config);
+        const data = MoDAL.getOrCreateInstance(this, config);
 
         if (typeof config !== 'string') {
           return;
@@ -4889,7 +4889,7 @@
 
     EventHandler.one(target, EVENT_SHOW$3, showEvent => {
       if (showEvent.defaultPrevented) {
-        // only register focus restorer if modal will actually get shown
+        // only register focus restorer if moDAL will actually get shown
         return;
       }
 
@@ -4899,18 +4899,18 @@
         }
       });
     });
-    const data = Modal.getOrCreateInstance(target);
+    const data = MoDAL.getOrCreateInstance(target);
     data.toggle(this);
   });
-  enableDismissTrigger(Modal);
+  enableDismissTrigger(MoDAL);
   /**
    * ------------------------------------------------------------------------
    * jQuery
    * ------------------------------------------------------------------------
-   * add .Modal to jQuery only if jQuery is present
+   * add .MoDAL to jQuery only if jQuery is present
    */
 
-  defineJQueryPlugin(Modal);
+  defineJQueryPlugin(MoDAL);
 
   /**
    * --------------------------------------------------------------------------
@@ -5005,7 +5005,7 @@
 
       this._element.removeAttribute('aria-hidden');
 
-      this._element.setAttribute('aria-modal', true);
+      this._element.setAttribute('aria-moDAL', true);
 
       this._element.setAttribute('role', 'dialog');
 
@@ -5048,7 +5048,7 @@
       const completeCallback = () => {
         this._element.setAttribute('aria-hidden', true);
 
-        this._element.removeAttribute('aria-modal');
+        this._element.removeAttribute('aria-moDAL');
 
         this._element.removeAttribute('role');
 
@@ -5356,13 +5356,13 @@
     MOUSELEAVE: `mouseleave${EVENT_KEY$4}`
   };
   const CLASS_NAME_FADE$2 = 'fade';
-  const CLASS_NAME_MODAL = 'modal';
+  const CLASS_NAME_MODAL = 'moDAL';
   const CLASS_NAME_SHOW$2 = 'show';
   const HOVER_STATE_SHOW = 'show';
   const HOVER_STATE_OUT = 'out';
   const SELECTOR_TOOLTIP_INNER = '.tooltip-inner';
   const SELECTOR_MODAL = `.${CLASS_NAME_MODAL}`;
-  const EVENT_MODAL_HIDE = 'hide.bs.modal';
+  const EVENT_MODAL_HIDE = 'hide.bs.moDAL';
   const TRIGGER_HOVER = 'hover';
   const TRIGGER_FOCUS = 'focus';
   const TRIGGER_CLICK = 'click';
@@ -5451,7 +5451,7 @@
 
     dispose() {
       clearTimeout(this._timeout);
-      EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
+      EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideMoDALHandler);
 
       if (this.tip) {
         this.tip.remove();
@@ -5775,13 +5775,13 @@
         }
       });
 
-      this._hideModalHandler = () => {
+      this._hideMoDALHandler = () => {
         if (this._element) {
           this.hide();
         }
       };
 
-      EventHandler.on(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
+      EventHandler.on(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideMoDALHandler);
 
       if (this._config.selector) {
         this._config = { ...this._config,
@@ -6765,7 +6765,7 @@
     Carousel,
     Collapse,
     Dropdown,
-    Modal,
+    MoDAL,
     Offcanvas,
     Popover,
     ScrollSpy,

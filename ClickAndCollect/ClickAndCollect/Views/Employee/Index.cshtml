@@ -1,0 +1,132 @@
+﻿@using System.Linq
+@model IEnumerable<Order>
+
+<div class="container py-5">
+    <!-- En-tête de la page -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold" style="color: #0f3460;">Préparateur de commande</h1>
+        <p class="text-muted fs-5">Liste des commandes à préparer pour demain</p>
+    </div>
+
+    <!-- Grille de cartes -->
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var orderToPrep in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a asp-action="#" data-id="@orderToPrep.Id" data-clientname="@orderToPrep.Client.Firstname @orderToPrep.Client.Lastname" class="text-decoration-none order-preview-trigger">
+                        <!-- Utilisation de ta classe card-hover -->
+                        <div class="card h-100 border-0 card-hover bg-white">
+
+                            <!-- En-tête de la carte : ID et Statut -->
+                            <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                                <span class="text-muted fw-bold">Commande #@orderToPrep.Id</span>
+                                <span class="badge bg-success rounded-pill px-3 py-2">@orderToPrep.Status</span>
+                            </div>
+
+                            <div class="card-body">
+                                <!-- Nom du client mis en évidence -->
+                                <h4 class="card-title fw-bold mb-1">@orderToPrep.Client.Firstname @orderToPrep.Client.Lastname</h4>
+                                <p class="text-muted small mb-3">Passée le @orderToPrep.OrderDate.ToString("dd/MM/yyyy à HH:mm")</p>
+
+                                <hr class="text-muted opacity-25">
+
+                                <!-- Informations de contact -->
+                                <div class="mb-4">
+                                    <p class="mb-1">
+                                        <strong style="color: #16213e;">Téléphone :</strong>
+                                        <a href="tel:@orderToPrep.Client.PhoneNumber" class="text-decoration-none" style="color: #28a745;">
+                                            @orderToPrep.Client.PhoneNumber
+                                        </a>
+                                    </p>
+                                </div>
+
+                                @* <!-- Bloc des caisses (style "dashboard" miniature) -->
+                                <div class="row text-center bg-light rounded p-2 mx-0">
+                                    <div class="col-6 border-end">
+                                        <small class="text-muted d-block">Caisses utilisées</small>
+                                        <strong class="fs-5" style="color: #0f3460;">@orderToPrep.CratesUsed</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Caisses rendues</small>
+                                        <strong class="fs-5" style="color: #0f3460;">@orderToPrep.CratesReturned</strong>
+                                    </div>
+                                </div> *@
+                            </div>
+
+                            @* <!-- Optionnel : Un bouton d'action en bas de carte -->
+                            <div class="card-footer bg-transparent border-top-0 pb-4 pt-0">
+                                <button class="btn btn-success w-100">Préparer cette commande</button>
+                            </div> *@
+
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-5 text-center bg-white" style="border-radius: 16px;">
+                <div class="card-body py-5">
+                    <div class="display-1 mb-4 opacity-50">📦</div>
+
+                    <h2 class="fw-bold mb-3" style="color: #0f3460;">Aucune commande en attente</h2>
+                    <p class="text-muted fs-5 mb-0">
+                        C'est très calme par ici... Vous êtes à jour dans toutes vos préparations pour demain !
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Displays Order Preview -->
+<div class="moDAL fade" id="orderMoDAL" tabindex="-1" aria-labelledby="orderMoDALLabel" aria-hidden="true">
+    <div class="moDAL-dialog moDAL-lg moDAL-dialog-centered">
+        <div class="moDAL-content border-0 shadow">
+            <div class="moDAL-header border-0 pb-0">
+                <h5 class="moDAL-title fw-bold" id="orderMoDALLabel">Aperçu de la commande</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="moDAL" aria-label="Fermer"></button>
+            </div>
+            <div class="moDAL-body pt-2" id="orderMoDALBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.order-preview-trigger').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                var id = this.dataset.id;
+                var clientname = this.dataset.clientname;
+
+                // Retour à ta version exacte avec bootstrap.MoDAL
+                var moDAL = new bootstrap.MoDAL(document.getElementById('orderMoDAL'));
+                var body = document.getElementById('orderMoDALBody');
+
+                document.getElementById('orderMoDALLabel').innerText = 'Commande de ' + clientname;
+
+                body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
+                moDAL.show();
+
+                fetch('/Employee/OrderPreview?orderId=' + id, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function (r) { return r.text(); })
+                .then(function (html) { body.innerHTML = html; })
+                .catch(function () {
+                    body.innerHTML = '<p class="text-danger text-center"><i class="bi bi-exclamation-triangle me-2"></i>Erreur lors du chargement.</p>';
+                });
+            });
+        });
+    </script>
+}
