@@ -19,16 +19,16 @@ namespace ClickAndCollect.Controllers
         }
 
         // UC-3 : Select Category — 1 appel BD
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            List<Category> categories = Category.GetAll(_categoryDAL);
+            List<Category> categories = await Category.GetAll(_categoryDal);
             return View(categories);
         }
 
         // UC-4 : Browse Product — 1 appel BD + stockage en session
-        public IActionResult Browse(int id)
+        public async Task<IActionResult> Browse(int id)
         {
-            List<Product> products = Product.GetByCategoryId(id, _productDAL);
+            List<Product> products = await Product.GetByCategoryId(id, _productDal);
 
             HttpContext.Session.SetString(SessionKeyProducts, JsonSerializer.Serialize(products));
 
@@ -36,12 +36,12 @@ namespace ClickAndCollect.Controllers
         }
 
         // UC-4 : Détail produit — 0 appel BD si produit déjà en session, sinon 1 appel BD (fallback)
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             Product? product = Product.GetFromSession(id, HttpContext.Session, SessionKeyProducts);
 
             if (product == null)
-                product = Product.GetById(id, _productDAL);
+                product = await Product.GetById(id, _productDal);
 
             if (product == null)
                 return NotFound();

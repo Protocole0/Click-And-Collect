@@ -64,21 +64,13 @@
                         <i class="bi bi-plus"></i>
                     </button>
                 </div>
-                <button class="btn btn-dark flex-grow-1 py-2">
-                    <i class="bi bi-cart3 me-2"></i>Ajouter au panier
+                <button class="btn btn-dark flex-grow-1 py-2"
+                        id="btn-add-cart"
+                        data-product-id="@Model.ProductId"
+                        data-unit-price="@Model.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">
+                    <i class="bi bi-cart3 me-2"></i>Ajouter au panier — @Model.Price.ToString("0.00") €
                 </button>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    document.getElementById('btn-minus').addEventListener('click', function () {
-        var input = document.getElementById('quantity');
-        if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
-    });
-    document.getElementById('btn-plus').addEventListener('click', function () {
-        var input = document.getElementById('quantity');
-        input.value = parseInt(input.value) + 1;
-    });
-</script>

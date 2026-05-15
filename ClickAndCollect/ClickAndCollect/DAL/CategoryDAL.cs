@@ -13,25 +13,25 @@ namespace ClickAndCollect.DAL
             _connectionString = connectionString;
         }
 
-        public List<Category> GetAll()
+        public async Task<List<Category>> GetAllAsync()
         {
             List<Category> categories = new List<Category>();
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
-                conn.Open();
+                await conn.OpenAsync();
                 SqlCommand cmd = new SqlCommand(
                     "SELECT category_id, name, image_url, description FROM category ORDER BY name",
                     conn);
 
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
                     int categoryIdOrd = reader.GetOrdinal("category_id");
                     int nameOrd       = reader.GetOrdinal("name");
                     int imageUrlOrd   = reader.GetOrdinal("image_url");
                     int descOrd       = reader.GetOrdinal("description");
 
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
                         categories.Add(new Category(
                             reader.GetInt32(categoryIdOrd),

@@ -4,6 +4,6 @@ namespace ClickAndCollect.Interfaces
 {
     public interface ICategoryDAL
     {
-        List<Category> GetAll();
+        Task<List<Category>> GetAllAsync();
     }
 }
