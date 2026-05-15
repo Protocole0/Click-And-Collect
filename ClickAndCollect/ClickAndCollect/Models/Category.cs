@@ -45,19 +45,19 @@ namespace ClickAndCollect.Models
         // Constructor just to have the category name in the order picker order preview
         public Category(string name)
         {
-            Name = name;
+            _name = name;
         }
 
         // --- Méthode statique : la classe Category délègue au DAL ---
 
-        public static async Task<List<Category>> GetAll(ICategoryDal categoryDal)
+        public static async Task<List<Category>> GetAll(ICategoryDAL categoryDal)
         {
             return await categoryDal.GetAllAsync();
         }
 
         // --- Méthode d'instance : l'objet Category communique avec la classe Product ---
 
-        public async Task LoadProductsAsync(IProductDal productDal)
+        public async Task LoadProductsAsync(IProductDAL productDal)
         {
             _products = await Product.GetByCategoryId(_categoryId, productDal);
         }

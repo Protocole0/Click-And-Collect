@@ -31,6 +31,11 @@ namespace ClickAndCollect.Models
             set { _password = value; }
         }
 
+        protected User()
+        {
+            
+        }
+
         public User(int id, string email, string password)
         {
             Id = id;

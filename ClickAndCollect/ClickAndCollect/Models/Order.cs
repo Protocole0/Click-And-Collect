@@ -1,19 +1,108 @@
+using ClickAndCollect.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 
 namespace ClickAndCollect.Models
 {
+    public enum OrderStatus
+    {
+        DRAFT,
+        PENDING_PREPARATION,
+        READY_FOR_PICKUP,
+        COLLECTED
+    }
+
     public class Order
     {
-        public const decimal ServiceFee = 5.95m;
+         public static decimal DefaultServiceFee = 5.95m;
 
+        // --- Liste des lignes (panier session ET commande BD) ---
         private List<OrderLine> _lines;
-
         public List<OrderLine> Lines
         {
             get => _lines;
             set { _lines = value; }
         }
+
+        // --- Champs commande BD ---
+
+        private int _id;
+        public int Id { 
+            get => _id; 
+            set => _id = value;
+        }
+
+        private DateTime _orderDate;
+        public DateTime OrderDate { 
+            get => _orderDate; 
+            set => _orderDate = value;
+        }
+
+        private decimal _serviceFee;
+        public decimal ServiceFee { 
+            get => _serviceFee; 
+            set => _serviceFee = value; 
+        }
+
+        private int _cratesUsed;
+        public int CratesUsed { 
+            get => _cratesUsed; 
+            set => _cratesUsed = value; 
+        }
+
+        private int _cratesReturned;
+        public int CratesReturned { 
+            get => _cratesReturned; 
+            set => _cratesReturned = value; 
+        }
+
+        private OrderStatus _status;
+        public OrderStatus Status { 
+            get => _status; 
+            set => _status = value; 
+        }
+
+        private Client? _client;
+        public Client? Client { 
+            get => _client; 
+            set => _client = value; 
+        }
+
+        // --- Constructeurs ---
+
+        public Order()
+        {
+            _lines = new List<OrderLine>();
+        }
+
+        public Order(int id)
+        {
+            _id    = id;
+            _lines = new List<OrderLine>();
+        }
+
+        public Order(int id, Client client)
+        {
+            _id             = id;
+            _client         = client;
+            _cratesUsed     = 0;
+            _cratesReturned = 0;
+            _status         = OrderStatus.PENDING_PREPARATION;
+            _lines          = new List<OrderLine>();
+        }
+
+        public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned, OrderStatus status, Client client)
+        {
+            _id             = id;
+            _orderDate      = orderDate;
+            _cratesUsed     = cratesUsed;
+            _cratesReturned = cratesReturned;
+            _status         = status;
+            _client         = client;
+            _lines          = new List<OrderLine>();
+        }
+
+        // --- Méthodes panier (session) ---
 
         public int TotalItems()
         {
@@ -30,13 +119,6 @@ namespace ClickAndCollect.Models
                 total += line.Quantity * line.Product.Price;
             return total;
         }
-
-        public Order()
-        {
-            _lines = new List<OrderLine>();
-        }
-
-        // --- Méthode d'instance : l'objet Order communique avec la classe Product ---
 
         public void AddProduct(Product product, int quantity)
         {
@@ -75,8 +157,6 @@ namespace ClickAndCollect.Models
             }
         }
 
-        // --- Méthodes statiques : gestion de la session ---
-
         public static Order GetFromSession(ISession session)
         {
             string? json = session.GetString("cart");
@@ -89,120 +169,17 @@ namespace ClickAndCollect.Models
         {
             session.SetString("cart", JsonSerializer.Serialize(this));
         }
-﻿using ClickAndCollect.Interfaces;
 
-namespace ClickAndCollect.Models
-{
-	public enum OrderStatus
-	{
-		DRAFT,
-		PENDING_PREPARATION,
-		READY_FOR_PICKUP,
-		COLLECTED
-    }
-    public class Order
-    {
-		private int _id;
-
-		public int Id
-		{
-			get { return _id; }
-			set { _id = value; }
-		}
-
-		private DateTime _orderDate;
-
-		public DateTime OrderDate
-		{
-			get { return _orderDate; }
-			set { _orderDate = value; }
-		}
-
-		private decimal _serviceFee;
-
-		public decimal ServiceFee
-		{
-			get { return _serviceFee; }
-			set { _serviceFee = value; }
-		}
-
-		private int _cratesUsed;
-
-		public int CratesUsed
-		{
-			get { return _cratesUsed; }
-			set { _cratesUsed = value; }
-		}
-		
-		private int _cratesReturned;
-
-		public int CratesReturned
-		{
-			get { return _cratesReturned; }
-			set { _cratesReturned = value; }
-		}
-
-		private OrderStatus _status;
-
-		public OrderStatus Status
-		{
-			get { return _status; }
-			set { _status = value; }
-		}
-
-		private Client _client;
-		public Client Client
-		{
-			get { return _client; }
-			set { _client = value; }
-		}
-
-        private List<OrderLine> _orderlines;
-        public List<OrderLine> OrderLines
-        {
-            get { return _orderlines; }
-            set { _orderlines = value; }
-        }
-
-        // Constructor to display order lines in the order picker order preview
-        public Order(int id)
-		{
-			Id = id;
-			OrderLines = new List<OrderLine>();
-        }
-        
-		public Order(int id, Client client)
-		{
-			Id = id;
-			Client = client;
-			CratesUsed = 0;
-			CratesReturned = 0;
-			Status = OrderStatus.PENDING_PREPARATION;
-		}
-		
-		public Order(int id, DateTime orderDate, int crates_used, int crates_returned, OrderStatus status, Client client)
-		{
-			Id = id;
-			OrderDate = orderDate;
-			CratesUsed = crates_used;
-			CratesReturned = crates_returned;
-			Status = status;
-			Client = client;
-			OrderLines = new List<OrderLine>();
-		}
+        // --- Méthodes BD (statiques) ---
 
         public static async Task<List<Order>> GetAllOrdersAsync(IOrderDAL orderDAL, OrderStatus status)
         {
             return await orderDAL.GetAllOrdersAsync(status);
         }
-        
-		public static async Task<Order> GetOrderAsync(IOrderDAL orderDAL, int orderId)
+
+        public static async Task<Order> GetOrderAsync(IOrderDAL orderDAL, int orderId)
         {
             return await orderDAL.GetOrderAsync(orderId);
         }
-
-
-
-
     }
 }

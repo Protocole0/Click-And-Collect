@@ -21,14 +21,14 @@ namespace ClickAndCollect.Controllers
         // UC-3 : Select Category — 1 appel BD
         public async Task<IActionResult> Index()
         {
-            List<Category> categories = await Category.GetAll(_categoryDal);
+            List<Category> categories = await Category.GetAll(_categoryDAL);
             return View(categories);
         }
 
         // UC-4 : Browse Product — 1 appel BD + stockage en session
         public async Task<IActionResult> Browse(int id)
         {
-            List<Product> products = await Product.GetByCategoryId(id, _productDal);
+            List<Product> products = await Product.GetByCategoryId(id, _productDAL);
 
             HttpContext.Session.SetString(SessionKeyProducts, JsonSerializer.Serialize(products));
 
@@ -41,7 +41,7 @@ namespace ClickAndCollect.Controllers
             Product? product = Product.GetFromSession(id, HttpContext.Session, SessionKeyProducts);
 
             if (product == null)
-                product = await Product.GetById(id, _productDal);
+                product = await Product.GetById(id, _productDAL);
 
             if (product == null)
                 return NotFound();
