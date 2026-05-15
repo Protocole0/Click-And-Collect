@@ -12,7 +12,6 @@ namespace ClickAndCollect.Models
         private decimal _price;
         private string? _imageUrl;
         private string? _nutritionalInfo;
-        private int _categoryId;
         private Category? _category;
 
         public int ProductId
@@ -51,27 +50,32 @@ namespace ClickAndCollect.Models
             set { _nutritionalInfo = value; }
         }
 
-        public int CategoryId
+        // Source unique de vérité pour la catégorie
+        public Category? Category
         {
-            get { return _categoryId; }
-            set { _categoryId = value; }
+            get { return _category; }
+            set { _category = value; }
         }
 
-        // Délègue à l'objet Category — pas de duplication de données
+        // Propriétés calculées depuis l'objet Category
+        public int CategoryId   => _category?.CategoryId ?? 0;
         public string? CategoryName => _category?.Name;
-        // Constructor to view the category name
-        // in the order picker order preview
-        public Product(string name, string imageUrl, Category category)
-        {
-            Name = name;
-            ImageUrl = imageUrl;
-            _category = category;
-        }
+
+        // --- Constructeurs ---
 
         public Product() { _name = string.Empty; }
 
+        // Constructeur utilisé par OrderDAL (nom + image + catégorie uniquement)
+        public Product(string name, string? imageUrl, Category? category)
+        {
+            _name     = name;
+            _imageUrl = imageUrl;
+            _category = category;
+        }
+
+        // Constructeur principal utilisé par ProductDAL
         public Product(int productId, string name, string? description, decimal price,
-                       string? imageUrl, string? nutritionalInfo, int categoryId, Category? category = null)
+                       string? imageUrl, string? nutritionalInfo, Category? category = null)
         {
             _productId       = productId;
             _name            = name;
@@ -79,7 +83,6 @@ namespace ClickAndCollect.Models
             _price           = price;
             _imageUrl        = imageUrl;
             _nutritionalInfo = nutritionalInfo;
-            _categoryId      = categoryId;
             _category        = category;
         }
 
@@ -90,7 +93,7 @@ namespace ClickAndCollect.Models
             return await productDal.GetByCategoryIdAsync(categoryId);
         }
 
-        public static async Task<Product?>GetById(int id, IProductDAL productDal)
+        public static async Task<Product?> GetById(int id, IProductDAL productDal)
         {
             return await productDal.GetByIdAsync(id);
         }
@@ -108,17 +111,11 @@ namespace ClickAndCollect.Models
 
         // --- Méthode d'instance : l'objet Product communique avec la classe Category ---
 
-        public async Task LoadCategoryAsync(ICategoryDAL categoryDal)
-        {
-            List<Category> all = await Category.GetAll(categoryDal);
-            _category = all.FirstOrDefault(c => c.CategoryId == _categoryId);
-        }
-
         public Category GetCategory()
         {
             if (_category == null)
-                throw new InvalidOperationException("La catégorie n'est pas chargée. Appelez LoadCategory() d'abord.");
+                throw new InvalidOperationException("La catégorie n'est pas chargée.");
             return _category;
         }
-    }  
+    }
 }
