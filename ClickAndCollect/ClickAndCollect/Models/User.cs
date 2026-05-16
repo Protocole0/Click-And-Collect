@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ClickAndCollect.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace ClickAndCollect.Models
 {
@@ -52,8 +53,11 @@ namespace ClickAndCollect.Models
             Id = id;
         }
 
+        // --- Méthode statique : la classe délègue au DAL ---
 
-
-
+        public static async Task<Client?> Login(string email, string password, IUserDAL userDAL)
+        {
+            return await userDAL.GetByEmailAndPasswordAsync(email, password);
+        }
     }
 }

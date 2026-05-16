@@ -5,16 +5,15 @@ using Microsoft.Data.SqlClient;
 
 namespace ClickAndCollect.DAL
 {
-    public class ClientDAL : IClientDAL
+    public class UserDAL : IUserDAL
     {
         private readonly string _connectionString;
 
-        public ClientDAL(string connectionString)
+        public UserDAL(string connectionString)
         {
             _connectionString = connectionString;
         }
 
-        // Fetch by email only, then verify the BCrypt hash in C#
         public async Task<Client?> GetByEmailAndPasswordAsync(string email, string password)
         {
             using SqlConnection conn = new SqlConnection(_connectionString);
@@ -32,8 +31,6 @@ namespace ClickAndCollect.DAL
                 return null;
 
             string storedHash = reader.GetString(reader.GetOrdinal("password"));
-
-            // Verify the plain-text password against the stored BCrypt hash
             if (!BCrypt.Net.BCrypt.Verify(password, storedHash))
                 return null;
 
@@ -63,7 +60,6 @@ namespace ClickAndCollect.DAL
             return count > 0;
         }
 
-        // Hash the password with BCrypt before storing it
         public async Task CreateAsync(Client client)
         {
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(client.Password);
