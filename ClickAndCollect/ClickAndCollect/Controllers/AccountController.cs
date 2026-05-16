@@ -1,5 +1,6 @@
 using ClickAndCollect.Interfaces;
 using ClickAndCollect.Models;
+using ClickAndCollect.Services;
 using ClickAndCollect.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,16 +8,18 @@ namespace ClickAndCollect.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IClientDAL _clientDAL;
+        private readonly IUserDAL     _userDAL;
+        private readonly IEmailService _emailService;
 
         public const string SessionKeyId        = "client_id";
         public const string SessionKeyFirstname = "client_firstname";
         public const string SessionKeyLastname  = "client_lastname";
         public const string SessionKeyUserType  = "user_type";
 
-        public AccountController(IClientDAL clientDAL)
+        public AccountController(IUserDAL userDAL, IEmailService emailService)
         {
-            _clientDAL = clientDAL;
+            _userDAL      = userDAL;
+            _emailService = emailService;
         }
 
         // GET: /Account/Login
@@ -35,7 +38,7 @@ namespace ClickAndCollect.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            Client? client = await _clientDAL.GetByEmailAndPasswordAsync(model.Email, model.Password);
+            Client? client = await Models.User.Login(model.Email, model.Password, _userDAL);
             if (client == null)
             {
                 ModelState.AddModelError(string.Empty, "Email ou mot de passe incorrect.");
@@ -62,16 +65,18 @@ namespace ClickAndCollect.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            if (await _clientDAL.EmailExistsAsync(model.Email))
+            if (await Client.EmailExists(model.Email, _userDAL))
             {
                 ModelState.AddModelError("Email", "Cet email est déjà utilisé.");
                 return View(model);
             }
 
             var client = new Client(0, model.Firstname, model.Lastname, model.Email, model.Password, model.PhoneNumber);
-            await _clientDAL.CreateAsync(client);
+            await client.CreateAccount(_userDAL);
 
-            Client? created = await _clientDAL.GetByEmailAndPasswordAsync(model.Email, model.Password);
+            await _emailService.SendWelcomeEmailAsync(model.Email, model.Firstname, model.Lastname, model.Email);
+
+            Client? created = await Models.User.Login(model.Email, model.Password, _userDAL);
             if (created != null)
                 StoreClientInSession(created);
 
@@ -94,7 +99,7 @@ namespace ClickAndCollect.Controllers
 
         private void StoreClientInSession(Client client)
         {
-            HttpContext.Session.SetInt32(SessionKeyId, client.Id);
+            HttpContext.Session.SetInt32(SessionKeyId,       client.Id);
             HttpContext.Session.SetString(SessionKeyFirstname, client.Firstname);
             HttpContext.Session.SetString(SessionKeyLastname,  client.Lastname);
             HttpContext.Session.SetString(SessionKeyUserType,  client.UserType);
@@ -110,7 +115,7 @@ namespace ClickAndCollect.Controllers
             };
         }
 
-        // Static helpers — usable from views and other controllers via Context.Session
+        // Static helpers — utilisables depuis les vues via Context.Session
         public static bool IsLoggedIn(ISession session)
             => session.GetInt32(SessionKeyId).HasValue;
 
