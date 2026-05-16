@@ -18,6 +18,7 @@ string connectionString = builder.Configuration.GetConnectionString("Default")!;
 builder.Services.AddTransient<ICategoryDAL>(_ => new CategoryDAL(connectionString));
 builder.Services.AddTransient<IProductDAL>(_ => new ProductDAL(connectionString));
 builder.Services.AddTransient<IOrderDAL>(_ => new OrderDAL(connectionString));
+builder.Services.AddTransient<IClientDAL>(_ => new ClientDAL(connectionString));
 
 var app = builder.Build();
 

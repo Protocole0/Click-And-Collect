@@ -1,0 +1,104 @@
+@using ClickAndCollect.Models
+@model IEnumerable<Order>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold" style="color: #0f3460;">Caissier</h1>
+        <p class="text-muted fs-5">Commandes prêtes à être récupérées</p>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var order in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="#" data-id="@order.Id"
+                       data-clientname="@order.Client.Firstname @order.Client.Lastname"
+                       class="text-decoration-none order-preview-trigger">
+                        <div class="card h-100 border-0 card-hover bg-white">
+
+                            <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                                <span class="text-muted fw-bold">Commande #@order.Id</span>
+                                <span class="badge rounded-pill px-3 py-2" style="background-color:#198754; color:white;">
+                                    Prête
+                                </span>
+                            </div>
+
+                            <div class="card-body">
+                                <h4 class="card-title fw-bold mb-1">@order.Client.Firstname @order.Client.Lastname</h4>
+                                <p class="text-muted small mb-3">Passée le @order.OrderDate.ToString("dd/MM/yyyy à HH:mm")</p>
+                                <hr class="text-muted opacity-25" />
+                                <p class="mb-0">
+                                    <strong style="color:#16213e;">Téléphone :</strong>
+                                    <a href="tel:@order.Client.PhoneNumber" class="text-decoration-none text-success">
+                                        @order.Client.PhoneNumber
+                                    </a>
+                                </p>
+                            </div>
+
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-5 text-center bg-white" style="border-radius: 16px;">
+                <div class="card-body py-5">
+                    <div class="display-1 mb-4 opacity-50">🛒</div>
+                    <h2 class="fw-bold mb-3" style="color: #0f3460;">Aucune commande prête</h2>
+                    <p class="text-muted fs-5 mb-0">
+                        Aucune commande n'est prête à être récupérée pour le moment.
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal aperçu commande -->
+<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="orderModalLabel">Aperçu de la commande</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body pt-2" id="orderModalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.order-preview-trigger').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                var id         = this.dataset.id;
+                var clientname = this.dataset.clientname;
+                var modal      = new bootstrap.Modal(document.getElementById('orderModal'));
+                var body       = document.getElementById('orderModalBody');
+
+                document.getElementById('orderModalLabel').innerText = 'Commande de ' + clientname;
+                body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
+                modal.show();
+
+                fetch('/Employee/OrderPreview?orderId=' + id, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function (r) { return r.text(); })
+                .then(function (html) { body.innerHTML = html; })
+                .catch(function () {
+                    body.innerHTML = '<p class="text-danger text-center"><i class="bi bi-exclamation-triangle me-2"></i>Erreur lors du chargement.</p>';
+                });
+            });
+        });
+    </script>
+}

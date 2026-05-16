@@ -84,14 +84,14 @@
 </div>
 
 <!-- Displays Order Preview -->
-<div class="moDAL fade" id="orderMoDAL" tabindex="-1" aria-labelledby="orderMoDALLabel" aria-hidden="true">
-    <div class="moDAL-dialog moDAL-lg moDAL-dialog-centered">
-        <div class="moDAL-content border-0 shadow">
-            <div class="moDAL-header border-0 pb-0">
-                <h5 class="moDAL-title fw-bold" id="orderMoDALLabel">Aperçu de la commande</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="moDAL" aria-label="Fermer"></button>
+<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="orderModalLabel">Aperçu de la commande</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
-            <div class="moDAL-body pt-2" id="orderMoDALBody">
+            <div class="modal-body pt-2" id="orderModalBody">
                 <div class="text-center py-4">
                     <div class="spinner-border text-success" role="status"></div>
                 </div>
@@ -109,14 +109,13 @@
                 var id = this.dataset.id;
                 var clientname = this.dataset.clientname;
 
-                // Retour à ta version exacte avec bootstrap.MoDAL
-                var moDAL = new bootstrap.MoDAL(document.getElementById('orderMoDAL'));
-                var body = document.getElementById('orderMoDALBody');
+                var modal = new bootstrap.Modal(document.getElementById('orderModal'));
+                var body = document.getElementById('orderModalBody');
 
-                document.getElementById('orderMoDALLabel').innerText = 'Commande de ' + clientname;
+                document.getElementById('orderModalLabel').innerText = 'Commande de ' + clientname;
 
                 body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
-                moDAL.show();
+                modal.show();
 
                 fetch('/Employee/OrderPreview?orderId=' + id, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }

@@ -14,9 +14,17 @@ namespace ClickAndCollect.Controllers
         {
             _orderDAL = orderDAL;
         }
-        public async Task<IActionResult> Index() {
+        // Orderpicker : commandes à préparer
+        public async Task<IActionResult> Index()
+        {
             List<Order> orders = await Order.GetAllOrdersAsync(_orderDAL, OrderStatus.PENDING_PREPARATION);
+            return View(orders);
+        }
 
+        // Cashier : commandes prêtes à récupérer
+        public async Task<IActionResult> Cashier()
+        {
+            List<Order> orders = await Order.GetAllOrdersAsync(_orderDAL, OrderStatus.READY_FOR_PICKUP);
             return View(orders);
         }
         

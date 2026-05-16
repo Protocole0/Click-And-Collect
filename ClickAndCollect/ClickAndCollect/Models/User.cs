@@ -31,6 +31,8 @@ namespace ClickAndCollect.Models
             set { _password = value; }
         }
 
+        public string UserType { get; set; } = string.Empty;
+
         protected User()
         {
             
