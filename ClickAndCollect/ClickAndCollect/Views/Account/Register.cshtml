@@ -1,0 +1,103 @@
+@model ClickAndCollect.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Créer un compte";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-plus-fill text-success" style="font-size:2.5rem;"></i>
+                        <h4 class="fw-bold mt-2 mb-0">Créer un compte</h4>
+                        <p class="text-muted small">Rejoignez Click & Collect et commandez en ligne</p>
+                    </div>
+
+                    <form asp-action="Register" method="post">
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label asp-for="Firstname" class="form-label fw-semibold">Prénom</label>
+                                <input asp-for="Firstname" class="form-control" placeholder="Jean" />
+                                <span asp-validation-for="Firstname" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="Lastname" class="form-label fw-semibold">Nom</label>
+                                <input asp-for="Lastname" class="form-control" placeholder="Dupont" />
+                                <span asp-validation-for="Lastname" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-envelope text-muted"></i>
+                                </span>
+                                <input asp-for="Email" class="form-control border-start-0"
+                                       placeholder="votre@email.com" autocomplete="email" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold">Numéro de téléphone</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-telephone text-muted"></i>
+                                </span>
+                                <input asp-for="PhoneNumber" class="form-control border-start-0"
+                                       placeholder="+32 470 00 00 00" />
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-semibold">Mot de passe</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-lock text-muted"></i>
+                                </span>
+                                <input asp-for="Password" class="form-control border-start-0"
+                                       placeholder="Minimum 12 caractères" autocomplete="new-password" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label fw-semibold">Confirmer le mot de passe</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-lock-fill text-muted"></i>
+                                </span>
+                                <input asp-for="ConfirmPassword" class="form-control border-start-0"
+                                       placeholder="••••••••••••" autocomplete="new-password" />
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-semibold">
+                            <i class="bi bi-person-check me-2"></i>Créer mon compte
+                        </button>
+                    </form>
+
+                    <hr class="my-3" />
+
+                    <p class="text-center text-muted small mb-0">
+                        Déjà un compte ?
+                        <a asp-controller="Account" asp-action="Login" class="text-success fw-semibold text-decoration-none">
+                            Se connecter
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -104,10 +104,11 @@
             el.addEventListener('click', function (e) {
                 e.preventDefault();
                 var id = this.dataset.id;
-                var moDAL = new bootstrap.Modal(document.getElementById('productModal'));
-                var body = document.getElementById('productModalBody');
+                var modalEl = document.getElementById('productModal');
+                var body    = document.getElementById('productModalBody');
 
                 body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
+                var moDAL = new bootstrap.Modal(modalEl);
                 moDAL.show();
 
                 fetch('/Product/Details/' + id, {
@@ -164,7 +165,7 @@
                                     var badge = document.getElementById('cart-badge');
                                     if (badge) badge.textContent = data.cartCount;
 
-                                    bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+                                    moDAL.hide();
 
                                     new bootstrap.Toast(document.getElementById('cartToast'), { delay: 3000 }).show();
                                 }
