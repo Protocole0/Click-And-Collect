@@ -1,18 +1,12 @@
-using ClickAndCollect.Interfaces;
 using ClickAndCollect.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace ClickAndCollect.Controllers
 {
     public class CartController : Controller
     {
-        private readonly IProductDAL _productDAL;
-        private const string SessionKeyProducts = "products_browse";
-
-        public CartController(IProductDAL productDAL)
-        {
-            _productDAL = productDAL;
-        }
+        public CartController() { }
 
         public IActionResult Index()
         {
@@ -21,11 +15,10 @@ namespace ClickAndCollect.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(int productId, int quantity)
+        public IActionResult Add(int productId, int quantity, string name, string price, string? imageUrl)
         {
-            Product? product = Product.GetFromSession(productId, HttpContext.Session, SessionKeyProducts);
-            if (product == null) product = await Product.GetById(productId, _productDAL);
-            if (product == null) return NotFound();
+            decimal unitPrice = decimal.Parse(price, CultureInfo.InvariantCulture);
+            var product = new Product(productId, name, null, unitPrice, imageUrl, null);
 
             Order cart = Order.GetFromSession(HttpContext.Session);
             cart.AddProduct(product, quantity);

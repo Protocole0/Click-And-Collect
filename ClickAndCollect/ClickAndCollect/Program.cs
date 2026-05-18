@@ -20,6 +20,8 @@ builder.Services.AddTransient<ICategoryDAL>(_ => new CategoryDAL(connectionStrin
 builder.Services.AddTransient<IProductDAL>(_ => new ProductDAL(connectionString));
 builder.Services.AddTransient<IOrderDAL>(_ => new OrderDAL(connectionString));
 builder.Services.AddTransient<IUserDAL>(_ => new UserDAL(connectionString));
+builder.Services.AddTransient<IStoreDAL>(_ => new StoreDAL(connectionString));
+builder.Services.AddTransient<ITimeSlotDAL>(_ => new TimeSlotDAL(connectionString));
 builder.Services.AddTransient<IEmailService, EmailService>();
 
 var app = builder.Build();

@@ -1,6 +1,7 @@
-﻿@model List<ClickAndCollect.Models.Product>
+﻿@model ClickAndCollect.Models.Category
 @{
     ViewData["Title"] = "Produits";
+    var products = Model.GetProducts();
 }
 
 <div class="container py-5">
@@ -20,11 +21,11 @@
     </nav>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Produits</h2>
-        <span class="text-muted small">@Model.Count produit(s)</span>
+        <h2 class="fw-bold mb-0">@Model.Name</h2>
+        <span class="text-muted small">@products.Count produit(s)</span>
     </div>
 
-    @if (!Model.Any())
+    @if (!products.Any())
     {
         <div class="alert alert-info text-center">
             <i class="bi bi-info-circle me-2"></i>Aucun produit disponible dans cette catégorie.
@@ -33,7 +34,7 @@
     else
     {
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-            @foreach (var product in Model)
+            @foreach (var product in products)
             {
                 <div class="col">
                     <div class="card h-100 border-0 shadow-sm card-hover">
@@ -61,6 +62,11 @@
                                 <i class="bi bi-plus-lg me-1"></i>Ajouter
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Détails pré-rendus, cachés, utilisés par le modal -->
+                    <div id="product-details-@product.ProductId" class="d-none">
+                        @await Html.PartialAsync("_ProductDetails", product)
                     </div>
                 </div>
             }
@@ -100,81 +106,78 @@
 
 @section Scripts {
     <script>
+        var moDAL = new bootstrap.Modal(document.getElementById('productModal'));
+
         document.querySelectorAll('.product-link, .product-img').forEach(function (el) {
             el.addEventListener('click', function (e) {
                 e.preventDefault();
-                var id = this.dataset.id;
-                var modalEl = document.getElementById('productModal');
-                var body    = document.getElementById('productModalBody');
+                var id   = this.dataset.id;
+                var body = document.getElementById('productModalBody');
 
-                body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
-                var moDAL = new bootstrap.Modal(modalEl);
+                // Copie les détails pré-rendus dans le modal
+                var details = document.getElementById('product-details-' + id);
+                body.innerHTML = details.innerHTML;
+
+                bindModalButtons(body);
                 moDAL.show();
-
-                fetch('/Product/Details/' + id, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(function (r) { return r.text(); })
-                .then(function (html) {
-                    body.innerHTML = html;
-
-                    // bind quantity buttons
-                    var btnMinus = body.querySelector('#btn-minus');
-                    var btnPlus  = body.querySelector('#btn-plus');
-                    var qtyInput = body.querySelector('#quantity');
-                    var btnCart  = body.querySelector('#btn-add-cart');
-
-                    function updateCartBtnLabel() {
-                        if (!btnCart) return;
-                        var unitPrice = parseFloat(btnCart.dataset.unitPrice) || 0;
-                        var total = (unitPrice * (parseInt(qtyInput.value) || 1)).toFixed(2).replace('.', ',');
-                        btnCart.innerHTML = '<i class="bi bi-cart3 me-2"></i>Ajouter au panier — ' + total + ' €';
-                    }
-
-                    if (btnMinus) {
-                        btnMinus.addEventListener('click', function () {
-                            if (parseInt(qtyInput.value) > 1)
-                                qtyInput.value = parseInt(qtyInput.value) - 1;
-                            updateCartBtnLabel();
-                        });
-                    }
-                    if (btnPlus) {
-                        btnPlus.addEventListener('click', function () {
-                            qtyInput.value = parseInt(qtyInput.value) + 1;
-                            updateCartBtnLabel();
-                        });
-                    }
-                    if (qtyInput) {
-                        qtyInput.addEventListener('input', updateCartBtnLabel);
-                    }
-
-                    // bind add-to-cart button
-                    if (btnCart) {
-                        btnCart.addEventListener('click', function () {
-                            var productId = this.dataset.productId;
-                            var quantity  = parseInt(qtyInput.value) || 1;
-
-                            fetch('/Cart/Add', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                body: 'productId=' + productId + '&quantity=' + quantity
-                            })
-                            .then(function (r) { return r.json(); })
-                            .then(function (data) {
-                                if (data.success) {
-                                    var badge = document.getElementById('cart-badge');
-                                    if (badge) badge.textContent = data.cartCount;
-
-                                    moDAL.hide();
-
-                                    new bootstrap.Toast(document.getElementById('cartToast'), { delay: 3000 }).show();
-                                }
-                            });
-                        });
-                    }
-                })
-                .catch(function () { body.innerHTML = '<p class="text-danger text-center"><i class="bi bi-exclamation-triangle me-2"></i>Erreur lors du chargement.</p>'; });
             });
         });
+
+        function bindModalButtons(body) {
+            var btnMinus = body.querySelector('#btn-minus');
+            var btnPlus  = body.querySelector('#btn-plus');
+            var qtyInput = body.querySelector('#quantity');
+            var btnCart  = body.querySelector('#btn-add-cart');
+
+            function updateCartBtnLabel() {
+                if (!btnCart) return;
+                var unitPrice = parseFloat(btnCart.dataset.unitPrice) || 0;
+                var total = (unitPrice * (parseInt(qtyInput.value) || 1)).toFixed(2).replace('.', ',');
+                btnCart.innerHTML = '<i class="bi bi-cart3 me-2"></i>Ajouter au panier — ' + total + ' €';
+            }
+
+            if (btnMinus) {
+                btnMinus.addEventListener('click', function () {
+                    if (parseInt(qtyInput.value) > 1) qtyInput.value = parseInt(qtyInput.value) - 1;
+                    updateCartBtnLabel();
+                });
+            }
+            if (btnPlus) {
+                btnPlus.addEventListener('click', function () {
+                    qtyInput.value = parseInt(qtyInput.value) + 1;
+                    updateCartBtnLabel();
+                });
+            }
+            if (qtyInput) {
+                qtyInput.addEventListener('input', updateCartBtnLabel);
+            }
+            if (btnCart) {
+                btnCart.addEventListener('click', function () {
+                    var productId = this.dataset.productId;
+                    var quantity  = parseInt(qtyInput.value) || 1;
+                    var name      = this.dataset.name;
+                    var price     = this.dataset.unitPrice;
+                    var imageUrl  = this.dataset.imageUrl;
+
+                    fetch('/Cart/Add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'productId=' + productId + '&quantity=' + quantity +
+                              '&name=' + encodeURIComponent(name) +
+                              '&price=' + price +
+                              '&imageUrl=' + encodeURIComponent(imageUrl)
+                    })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.success) {
+                            var badge = document.getElementById('cart-badge');
+                            if (badge) badge.textContent = data.cartCount;
+                            moDAL.hide();
+                            new bootstrap.Toast(document.getElementById('cartToast'), { delay: 3000 }).show();
+                        }
+                    });
+                });
+            }
+        }
     </script>
 }

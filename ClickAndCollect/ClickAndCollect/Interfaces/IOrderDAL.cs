@@ -6,5 +6,6 @@ namespace ClickAndCollect.Interfaces
     {
         Task<List<Order>> GetAllOrdersAsync(OrderStatus status);
         Task<Order> GetOrderAsync(int orderId);
+        Task CreateAsync(Order order);
     }
 }

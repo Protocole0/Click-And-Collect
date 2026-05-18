@@ -1,0 +1,297 @@
+@model ClickAndCollect.Models.Order
+@using ClickAndCollect.Models
+@{
+    ViewData["Title"] = "Finaliser la commande";
+    List<Store> stores = ViewBag.Stores as List<Store> ?? new List<Store>();
+}
+
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">Finaliser la commande</h2>
+
+    <div class="row g-4">
+
+        <!-- ======= COLONNE GAUCHE : récap commande ======= -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top:80px;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-bag me-2 text-success"></i>Votre commande</h5>
+
+                    @foreach (var line in Model.Lines)
+                    {
+                        <div class="d-flex align-items-center py-2 border-bottom">
+                            <img src="@line.Product.ImageUrl" alt="@line.Product.Name"
+                                 class="rounded me-3" style="width:45px;height:45px;object-fit:cover;"
+                                 onerror="this.src='/images/placeholder.png'" />
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold small">@line.Product.Name</div>
+                                <div class="text-muted small">@line.Quantity</div>
+                            </div>
+                            <div class="fw-semibold text-success small">@line.SubTotal.ToString("0.00") €</div>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between mt-3 mb-1">
+                        <span class="text-muted small">Sous-total</span>
+                        <span class="small fw-semibold">@Model.TotalAmount().ToString("0.00") €</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Frais de service</span>
+                        <span class="small fw-semibold">@Order.DefaultServiceFee.ToString("0.00") €</span>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold text-success fs-5">
+                            @((Model.TotalAmount() + Order.DefaultServiceFee).ToString("0.00")) €
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======= COLONNE DROITE : étapes ======= -->
+        <div class="col-lg-8">
+
+            <!-- ÉTAPE 1 : Magasin -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">
+                        <span class="badge bg-success rounded-circle me-2">1</span>Choisissez votre magasin
+                    </h5>
+                    <div class="row g-3">
+                        @foreach (var store in stores)
+                        {
+                            <div class="col-md-6">
+                                <label class="w-100 h-100" style="cursor:pointer;">
+                                    <input type="radio" name="storeRadio" value="@store.StoreId"
+                                           class="d-none store-radio" />
+                                    <div class="card border-0 bg-light store-card h-100 p-3" style="transition:.2s;">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-shop text-success me-2 mt-1"></i>
+                                            <div>
+                                                <div class="fw-semibold">@store.Name</div>
+                                                <div class="text-muted small">@store.FullAddress</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 2 : Date (masquée jusqu'à sélection magasin) -->
+            <div class="card border-0 shadow-sm mb-4 d-none" id="step-date">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">
+                        <span class="badge bg-success rounded-circle me-2">2</span>Choisissez une date de retrait
+                    </h5>
+                    <div id="dates-loading" class="text-center py-3 d-none">
+                        <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+                        <span class="ms-2 text-muted small">Chargement des dates...</span>
+                    </div>
+                    <div id="dates-container" class="d-flex flex-wrap gap-2"></div>
+                    <p id="dates-empty" class="text-muted small d-none">
+                        <i class="bi bi-info-circle me-1"></i>Aucune date disponible pour ce magasin.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 3 : Créneau (masqué jusqu'à sélection date) -->
+            <div class="card border-0 shadow-sm mb-4 d-none" id="step-timeslot">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">
+                        <span class="badge bg-success rounded-circle me-2">3</span>Choisissez un créneau horaire
+                    </h5>
+                    <div id="slots-loading" class="text-center py-3 d-none">
+                        <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+                        <span class="ms-2 text-muted small">Chargement des créneaux...</span>
+                    </div>
+                    <div id="slots-container" class="row g-2"></div>
+                    <p id="slots-empty" class="text-muted small d-none">
+                        <i class="bi bi-info-circle me-1"></i>Aucun créneau disponible pour cette date.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 4 : Validation (masquée jusqu'à sélection créneau) -->
+            <div class="d-none" id="step-confirm">
+                <form asp-action="PlaceOrder" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="input-store-id"    name="storeId" />
+                    <input type="hidden" id="input-timeslot-id" name="timeSlotId" />
+
+                    <div class="card border-success border-0 shadow-sm mb-3">
+                        <div class="card-body p-4 bg-success bg-opacity-10 rounded">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                                <div>
+                                    <div class="fw-semibold" id="confirm-summary"></div>
+                                    <div class="text-muted small" id="confirm-slot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-3 fw-bold fs-5">
+                        <i class="bi bi-bag-check me-2"></i>Valider la commande
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var selectedStoreId   = null;
+    var selectedStoreName = null;
+    var selectedDate      = null;
+    var selectedDateLabel = null;
+    var selectedSlotLabel = null;
+
+    // ── Sélection du magasin ──
+    document.querySelectorAll('.store-radio').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            // Reset visuels
+            document.querySelectorAll('.store-card').forEach(function(c) {
+                c.classList.remove('border', 'border-success', 'bg-white');
+                c.classList.add('bg-light');
+            });
+            this.closest('label').querySelector('.store-card')
+                .classList.remove('bg-light');
+            this.closest('label').querySelector('.store-card')
+                .classList.add('border', 'border-success', 'bg-white');
+
+            selectedStoreId   = this.value;
+            selectedStoreName = this.closest('label').querySelector('.fw-semibold').textContent;
+            document.getElementById('input-store-id').value = selectedStoreId;
+
+            // Reset étapes suivantes
+            resetFrom('date');
+
+            // Afficher étape 2
+            document.getElementById('step-date').classList.remove('d-none');
+            loadDates(selectedStoreId);
+        });
+    });
+
+    // ── Chargement des dates ──
+    function loadDates(storeId) {
+        var container = document.getElementById('dates-container');
+        var loading   = document.getElementById('dates-loading');
+        var empty     = document.getElementById('dates-empty');
+
+        container.innerHTML = '';
+        loading.classList.remove('d-none');
+        empty.classList.add('d-none');
+
+        fetch('/Order/GetDates?storeId=' + storeId)
+            .then(function(r) { return r.json(); })
+            .then(function(dates) {
+                loading.classList.add('d-none');
+                if (dates.length === 0) {
+                    empty.classList.remove('d-none');
+                    return;
+                }
+                dates.forEach(function(d) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-outline-success date-btn text-capitalize';
+                    btn.dataset.value = d.value;
+                    btn.dataset.label = d.label;
+                    btn.innerHTML = '<i class="bi bi-calendar3 me-1"></i>' + d.label;
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.date-btn').forEach(function(b) {
+                            b.classList.remove('btn-success');
+                            b.classList.add('btn-outline-success');
+                        });
+                        this.classList.remove('btn-outline-success');
+                        this.classList.add('btn-success');
+
+                        selectedDate      = this.dataset.value;
+                        selectedDateLabel = this.dataset.label;
+
+                        resetFrom('slot');
+                        document.getElementById('step-timeslot').classList.remove('d-none');
+                        loadSlots(selectedStoreId, selectedDate);
+                    });
+                    container.appendChild(btn);
+                });
+            })
+            .catch(function() { loading.classList.add('d-none'); });
+    }
+
+    // ── Chargement des créneaux ──
+    function loadSlots(storeId, date) {
+        var container = document.getElementById('slots-container');
+        var loading   = document.getElementById('slots-loading');
+        var empty     = document.getElementById('slots-empty');
+
+        container.innerHTML = '';
+        loading.classList.remove('d-none');
+        empty.classList.add('d-none');
+
+        fetch('/Order/GetTimeSlots?storeId=' + storeId + '&date=' + date)
+            .then(function(r) { return r.json(); })
+            .then(function(slots) {
+                loading.classList.add('d-none');
+                if (slots.length === 0) {
+                    empty.classList.remove('d-none');
+                    return;
+                }
+                slots.forEach(function(s) {
+                    var col = document.createElement('div');
+                    col.className = 'col-md-4 col-6';
+
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-outline-success w-100 slot-btn';
+                    btn.dataset.id    = s.timeSlotId;
+                    btn.dataset.label = s.label;
+                    btn.innerHTML =
+                        '<i class="bi bi-clock me-1"></i>' + s.label +
+                        '<br><small class="text-muted">' + s.placesLeft + ' place(s) restante(s)</small>';
+
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.slot-btn').forEach(function(b) {
+                            b.classList.remove('btn-success');
+                            b.classList.add('btn-outline-success');
+                        });
+                        this.classList.remove('btn-outline-success');
+                        this.classList.add('btn-success');
+
+                        document.getElementById('input-timeslot-id').value = this.dataset.id;
+                        selectedSlotLabel = this.dataset.label;
+
+                        // Afficher récap + bouton confirmer
+                        document.getElementById('step-confirm').classList.remove('d-none');
+                        document.getElementById('confirm-summary').textContent =
+                            selectedStoreName;
+                        document.getElementById('confirm-slot').textContent =
+                            selectedDateLabel + ' — ' + selectedSlotLabel;
+                    });
+
+                    col.appendChild(btn);
+                    container.appendChild(col);
+                });
+            })
+            .catch(function() { loading.classList.add('d-none'); });
+    }
+
+    // ── Reset des étapes suivantes ──
+    function resetFrom(step) {
+        if (step === 'date' || step === 'slot') {
+            document.getElementById('step-timeslot').classList.add('d-none');
+            document.getElementById('slots-container').innerHTML = '';
+            document.getElementById('step-confirm').classList.add('d-none');
+            document.getElementById('input-timeslot-id').value = '';
+        }
+        if (step === 'date') {
+            document.getElementById('dates-container').innerHTML = '';
+        }
+    }
+</script>
+}
