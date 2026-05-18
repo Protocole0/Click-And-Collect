@@ -111,5 +111,47 @@ namespace ClickAndCollect.DAL
             return order;
         }
 
+        public async Task CreateAsync(Order order)
+        {
+            using SqlConnection conn = new SqlConnection(_connectionString);
+            await conn.OpenAsync();
+            using SqlTransaction tx = (SqlTransaction)await conn.BeginTransactionAsync();
+            try
+            {
+                SqlCommand cmdOrder = new SqlCommand(
+                    "INSERT INTO orders (order_date, crates_used, crates_returned, status, user_id, time_slot_id, store_id) " +
+                    "OUTPUT INSERTED.order_id " +
+                    "VALUES (@date, @crates_used, @crates_returned, @status, @userId, @timeSlotId, @storeId)",
+                    conn, tx);
+                cmdOrder.Parameters.AddWithValue("@date",           order.OrderDate);
+                cmdOrder.Parameters.AddWithValue("@crates_used",    order.CratesUsed);
+                cmdOrder.Parameters.AddWithValue("@crates_returned", order.CratesReturned);
+                cmdOrder.Parameters.AddWithValue("@status",         order.Status.ToString());
+                cmdOrder.Parameters.AddWithValue("@userId",         order.Client!.Id);
+                cmdOrder.Parameters.AddWithValue("@timeSlotId",     order.TimeSlotId);
+                cmdOrder.Parameters.AddWithValue("@storeId",        order.StoreId);
+
+                int orderId = (int)(await cmdOrder.ExecuteScalarAsync())!;
+
+                foreach (OrderLine line in order.Lines)
+                {
+                    SqlCommand cmdLine = new SqlCommand(
+                        "INSERT INTO order_line (quantity, unit_price, product_id, order_id) VALUES (@qty, @unitPrice, @productId, @orderId)",
+                        conn, tx);
+                    cmdLine.Parameters.AddWithValue("@qty",       line.Quantity);
+                    cmdLine.Parameters.AddWithValue("@unitPrice", line.Product.Price);
+                    cmdLine.Parameters.AddWithValue("@productId", line.Product.ProductId);
+                    cmdLine.Parameters.AddWithValue("@orderId",   orderId);
+                    await cmdLine.ExecuteNonQueryAsync();
+                }
+
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
+        }
     }
 }

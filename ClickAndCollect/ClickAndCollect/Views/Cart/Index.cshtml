@@ -96,9 +96,10 @@
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button class="btn btn-dark btn-lg fw-semibold" disabled>
-                            Procéder au paiement &rarr;
-                        </button>
+                        <a asp-controller="Order" asp-action="Checkout"
+                           class="btn btn-success btn-lg fw-semibold">
+                            <i class="bi bi-bag-check me-2"></i>Passer la commande
+                        </a>
                         <a asp-controller="Product" asp-action="Index"
                            class="btn btn-outline-secondary fw-semibold">
                             Continuer mes courses

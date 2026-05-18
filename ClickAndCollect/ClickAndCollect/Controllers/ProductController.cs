@@ -1,16 +1,13 @@
 using ClickAndCollect.Interfaces;
 using ClickAndCollect.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace ClickAndCollect.Controllers
 {
     public class ProductController : Controller
     {
         private readonly ICategoryDAL _categoryDAL;
-        private readonly IProductDAL _productDAL;
-
-        private const string SessionKeyProducts = "products_browse";
+        private readonly IProductDAL  _productDAL;
 
         public ProductController(ICategoryDAL categoryDAL, IProductDAL productDAL)
         {
@@ -18,30 +15,29 @@ namespace ClickAndCollect.Controllers
             _productDAL  = productDAL;
         }
 
-        // UC-3 : Select Category — 1 appel BD
+        // UC-3 : Select Category
         public async Task<IActionResult> Index()
         {
             List<Category> categories = await Category.GetAll(_categoryDAL);
             return View(categories);
         }
 
-        // UC-4 : Browse Product — 1 appel BD + stockage en session
+        // UC-4 : Browse Product — charge la catégorie puis ses produits via LoadProductsAsync
         public async Task<IActionResult> Browse(int id)
         {
-            List<Product> products = await Product.GetByCategoryId(id, _productDAL);
+            Category? category = await Category.GetById(id, _categoryDAL);
+            if (category == null)
+                return NotFound();
 
-            HttpContext.Session.SetString(SessionKeyProducts, JsonSerializer.Serialize(products));
+            await category.LoadProductsAsync(_productDAL);
 
-            return View(products);
+            return View(category);
         }
 
-        // UC-4 : Détail produit — 0 appel BD si produit déjà en session, sinon 1 appel BD (fallback)
+        // UC-4 : Détail produit — toujours récupéré depuis la BD
         public async Task<IActionResult> Details(int id)
         {
-            Product? product = Product.GetFromSession(id, HttpContext.Session, SessionKeyProducts);
-
-            if (product == null)
-                product = await Product.GetById(id, _productDAL);
+            Product? product = await Product.GetById(id, _productDAL);
 
             if (product == null)
                 return NotFound();

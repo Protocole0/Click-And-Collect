@@ -19,7 +19,7 @@ namespace ClickAndCollect.DAL
             using SqlConnection conn = new SqlConnection(_connectionString);
             await conn.OpenAsync();
             SqlCommand cmd = new SqlCommand(
-                "SELECT u.user_id, u.user_type, u.password, c.first_name, c.last_name, c.phone_number " +
+                "SELECT u.user_id, u.user_type, u.password, u.email, c.first_name, c.last_name, c.phone_number " +
                 "FROM users u " +
                 "LEFT JOIN Client c ON u.user_id = c.user_id " +
                 "WHERE u.email = @email",
@@ -36,6 +36,7 @@ namespace ClickAndCollect.DAL
 
             int    idOrd        = reader.GetOrdinal("user_id");
             int    typeOrd      = reader.GetOrdinal("user_type");
+            int    emailOrd     = reader.GetOrdinal("email");
             int    firstnameOrd = reader.GetOrdinal("first_name");
             int    lastnameOrd  = reader.GetOrdinal("last_name");
             int    phoneOrd     = reader.GetOrdinal("phone_number");
@@ -46,6 +47,7 @@ namespace ClickAndCollect.DAL
 
             var client = new Client(reader.GetInt32(idOrd), firstname, lastname, phone);
             client.UserType = reader.GetString(typeOrd);
+            client.Email    = reader.GetString(emailOrd);
             return client;
         }
 

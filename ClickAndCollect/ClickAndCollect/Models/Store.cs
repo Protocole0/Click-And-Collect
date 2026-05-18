@@ -1,77 +1,51 @@
-﻿namespace ClickAndCollect.Models
+using ClickAndCollect.Interfaces;
+
+namespace ClickAndCollect.Models
 {
-	public class Store
-	{
-		private int _id;
+    public class Store
+    {
+        private int _storeId;
+        public int StoreId { get => _storeId; set => _storeId = value; }
 
-		public int Id
-		{
-			get { return _id; }
-			set { _id = value; }
-		}
+        private string _name;
+        public string Name { get => _name; set => _name = value; }
 
-		private string _name;
+        private string _streetName;
+        public string StreetName { get => _streetName; set => _streetName = value; }
 
-		public string Name
-		{
-			get { return _name; }
-			set { _name = value; }
-		}
+        private string _streetNumber;
+        public string StreetNumber { get => _streetNumber; set => _streetNumber = value; }
 
-		private string _streetName;
+        private string _city;
+        public string City { get => _city; set => _city = value; }
 
-		public string StreetName
-		{
-			get { return _streetName; }
-			set { _streetName = value; }
-		}
+        private string _postalCode;
+        public string PostalCode { get => _postalCode; set => _postalCode = value; }
 
-		private string _streetNumber;
+        public string FullAddress => $"{_streetName} {_streetNumber}, {_postalCode} {_city}";
 
-		public string StreetNumber
-		{
-			get { return _streetNumber; }
-			set { _streetNumber = value; }
-		}
+        public Store() { _name = _streetName = _streetNumber = _city = _postalCode = string.Empty; }
 
-		private string _city;
-
-		public string City
-		{
-			get { return _city; }
-			set { _city = value; }
-		}
-
-		private string _postalCode;
-
-		public string PostalCode
-		{
-			get { return _postalCode; }
-			set { _postalCode = value; }
-		}
-
-		private List<User> _employees;
-
-		public List<User> Employees
-		{
-			get { return _employees; }
-			set { _employees = value; }
-		}
-
-		public Store()
-		{
-			_employees = new List<User>();
+        public Store(int storeId, string name, string streetName, string streetNumber, string city, string postalCode)
+        {
+            _storeId      = storeId;
+            _name         = name;
+            _streetName   = streetName;
+            _streetNumber = streetNumber;
+            _city         = city;
+            _postalCode   = postalCode;
         }
 
-		public Store(int id, string name, string streetName, string streetNumber, string city, string postalCode)
-		{
-			_id = id;
-			_name = name;
-			_streetName = streetName;
-			_streetNumber = streetNumber;
-			_city = city;
-			_postalCode = postalCode;
-			_employees = new List<User>();
-		}
+        // --- Méthodes statiques : la classe délègue au DAL ---
+
+        public static async Task<List<Store>> GetAll(IStoreDAL storeDAL)
+        {
+            return await storeDAL.GetAllAsync();
+        }
+
+        public static async Task<Store?> GetById(int storeId, IStoreDAL storeDAL)
+        {
+            return await storeDAL.GetByIdAsync(storeId);
+        }
     }
 }

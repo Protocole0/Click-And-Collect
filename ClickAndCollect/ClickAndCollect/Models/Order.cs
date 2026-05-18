@@ -63,10 +63,16 @@ namespace ClickAndCollect.Models
         }
 
         private Client? _client;
-        public Client? Client { 
-            get => _client; 
-            set => _client = value; 
+        public Client? Client {
+            get => _client;
+            set => _client = value;
         }
+
+        private int _storeId;
+        public int StoreId { get => _storeId; set => _storeId = value; }
+
+        private int _timeSlotId;
+        public int TimeSlotId { get => _timeSlotId; set => _timeSlotId = value; }
 
         // --- Constructeurs ---
 
@@ -91,6 +97,22 @@ namespace ClickAndCollect.Models
             _lines          = new List<OrderLine>();
         }
 
+        // Constructeur complet pour valider une commande client
+        public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned,
+                     OrderStatus status, Client client, List<OrderLine> lines,
+                     int storeId, int timeSlotId)
+        {
+            _id             = id;
+            _orderDate      = orderDate;
+            _cratesUsed     = cratesUsed;
+            _cratesReturned = cratesReturned;
+            _status         = status;
+            _client         = client;
+            _lines          = lines;
+            _storeId        = storeId;
+            _timeSlotId     = timeSlotId;
+        }
+
         public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned, OrderStatus status, Client client)
         {
             _id             = id;
@@ -109,6 +131,7 @@ namespace ClickAndCollect.Models
             int total = 0;
             foreach (OrderLine line in _lines)
                 total += line.Quantity;
+
             return total;
         }
 
@@ -117,6 +140,7 @@ namespace ClickAndCollect.Models
             decimal total = 0;
             foreach (OrderLine line in _lines)
                 total += line.Quantity * line.Product.Price;
+
             return total;
         }
 
@@ -170,7 +194,7 @@ namespace ClickAndCollect.Models
             session.SetString("cart", JsonSerializer.Serialize(this));
         }
 
-        // --- Méthodes BD (statiques) ---
+        // --- Méthodes BD ---
 
         public static async Task<List<Order>> GetAllOrdersAsync(IOrderDAL orderDAL, OrderStatus status)
         {
@@ -180,6 +204,12 @@ namespace ClickAndCollect.Models
         public static async Task<Order> GetOrderAsync(IOrderDAL orderDAL, int orderId)
         {
             return await orderDAL.GetOrderAsync(orderId);
+        }
+
+        // Méthode d'instance : l'objet Order se persiste en BD via le DAL
+        public async Task PlaceOrder(IOrderDAL orderDAL)
+        {
+            await orderDAL.CreateAsync(this);
         }
     }
 }

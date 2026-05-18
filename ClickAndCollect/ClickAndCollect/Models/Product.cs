@@ -1,6 +1,4 @@
 using ClickAndCollect.Interfaces;
-using Microsoft.AspNetCore.Http;
-using System.Text.Json;
 
 namespace ClickAndCollect.Models
 {
@@ -59,6 +57,7 @@ namespace ClickAndCollect.Models
 
         // Propriétés calculées depuis l'objet Category
         public int CategoryId   => _category?.CategoryId ?? 0;
+
         public string? CategoryName => _category?.Name;
 
         // --- Constructeurs ---
@@ -96,17 +95,6 @@ namespace ClickAndCollect.Models
         public static async Task<Product?> GetById(int id, IProductDAL productDal)
         {
             return await productDal.GetByIdAsync(id);
-        }
-
-        // Parcourt la liste en session et retourne le produit correspondant à l'id
-        public static Product? GetFromSession(int id, ISession session, string sessionKey)
-        {
-            string? json = session.GetString(sessionKey);
-            if (json == null)
-                return null;
-
-            List<Product>? products = JsonSerializer.Deserialize<List<Product>>(json);
-            return products?.FirstOrDefault(p => p._productId == id);
         }
 
         // --- Méthode d'instance : l'objet Product communique avec la classe Category ---

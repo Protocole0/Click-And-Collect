@@ -8,7 +8,7 @@ namespace ClickAndCollect.Models
         private string _name;
         private string? _imageUrl;
         private string? _description;
-        private List<Product>? _products;
+        private List<Product> _products;
 
         public int CategoryId
         {
@@ -34,7 +34,11 @@ namespace ClickAndCollect.Models
             set { _description = value; }
         }
 
-        public Category() { _name = string.Empty; }
+        public Category()
+        {
+            _name     = string.Empty;
+            _products = new List<Product>();
+        }
 
         public Category(int categoryId, string name, string? imageUrl, string? description)
         {
@@ -42,32 +46,46 @@ namespace ClickAndCollect.Models
             _name        = name;
             _imageUrl    = imageUrl;
             _description = description;
+            _products    = new List<Product>();
         }
 
-        // Constructor just to have the category name in the order picker order preview
         public Category(string name)
         {
-            _name = name;
+            _name     = name;
+            _products = new List<Product>();
         }
 
-        // --- Méthode statique : la classe Category délègue au DAL ---
+        // --- Méthodes statiques : la classe Category délègue au DAL ---
 
         public static async Task<List<Category>> GetAll(ICategoryDAL categoryDal)
         {
             return await categoryDal.GetAllAsync();
         }
 
-        // --- Méthode d'instance : l'objet Category communique avec la classe Product ---
+        public static async Task<Category?> GetById(int categoryId, ICategoryDAL categoryDal)
+        {
+            return await categoryDal.GetByIdAsync(categoryId);
+        }
+
+        // --- Méthodes d'instance : l'objet Category gère sa liste de produits ---
+
+        public void AddProduct(Product product)
+        {
+            foreach (var p in _products)
+                if (p.ProductId == product.ProductId)
+                    return;
+            _products.Add(product);
+        }
 
         public async Task LoadProductsAsync(IProductDAL productDal)
         {
-            _products = await Product.GetByCategoryId(_categoryId, productDal);
+            List<Product> products = await Product.GetByCategoryId(_categoryId, productDal);
+            foreach (var product in products)
+                AddProduct(product);
         }
 
         public List<Product> GetProducts()
         {
-            if (_products == null)
-                throw new InvalidOperationException("Les produits ne sont pas chargés. Appelez LoadProducts() d'abord.");
             return _products;
         }
     }
