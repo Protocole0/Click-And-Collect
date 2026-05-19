@@ -19,9 +19,9 @@ namespace ClickAndCollect.DAL
             using SqlConnection conn = new SqlConnection(_connectionString);
             await conn.OpenAsync();
             SqlCommand cmd = new SqlCommand(
-                "SELECT u.user_id, u.user_type, u.password, u.email, c.first_name, c.last_name, c.phone_number " +
+                "SELECT u.user_type, u.password, u.email, c.client_id, c.first_name, c.last_name, c.phone_number " +
                 "FROM users u " +
-                "LEFT JOIN Client c ON u.user_id = c.user_id " +
+                "LEFT JOIN client c ON u.user_id = c.user_id " +
                 "WHERE u.email = @email",
                 conn);
             cmd.Parameters.AddWithValue("@email", email);
@@ -34,7 +34,7 @@ namespace ClickAndCollect.DAL
             if (!BCrypt.Net.BCrypt.Verify(password, storedHash))
                 return null;
 
-            int    idOrd        = reader.GetOrdinal("user_id");
+            int    clientIdOrd  = reader.GetOrdinal("client_id");
             int    typeOrd      = reader.GetOrdinal("user_type");
             int    emailOrd     = reader.GetOrdinal("email");
             int    firstnameOrd = reader.GetOrdinal("first_name");
@@ -45,7 +45,8 @@ namespace ClickAndCollect.DAL
             string lastname  = reader.IsDBNull(lastnameOrd)  ? string.Empty : reader.GetString(lastnameOrd);
             string phone     = reader.IsDBNull(phoneOrd)     ? string.Empty : reader.GetString(phoneOrd);
 
-            var client = new Client(reader.GetInt32(idOrd), firstname, lastname, phone);
+            int clientId = reader.IsDBNull(clientIdOrd) ? 0 : reader.GetInt32(clientIdOrd);
+            var client = new Client(clientId, firstname, lastname, phone);
             client.UserType = reader.GetString(typeOrd);
             client.Email    = reader.GetString(emailOrd);
             return client;

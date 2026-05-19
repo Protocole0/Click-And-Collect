@@ -49,6 +49,7 @@ namespace ClickAndCollect.Models
         private const int MaxReservationsPerSlot = 10;
 
         public bool IsAvailable => Reservations < MaxReservationsPerSlot;
+
         public int PlacesLeft   => MaxReservationsPerSlot - Reservations;
 
         // --- Méthodes statiques : la classe délègue au DAL puis applique les règles métier ---

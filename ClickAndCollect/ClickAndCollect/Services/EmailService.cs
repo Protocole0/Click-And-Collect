@@ -79,7 +79,7 @@ namespace ClickAndCollect.Services
             var linesHtml = new StringBuilder();
             foreach (var line in order.Lines)
             {
-                string subtotal = line.SubTotal.ToString("0.00", CultureInfo.InvariantCulture);
+                string subtotal = line.GetSubTotal().ToString("0.00", CultureInfo.InvariantCulture);
                 linesHtml.Append($"""
                                   <tr>
                                     <td style="padding:10px 0;border-bottom:1px solid #e9ecef;color:#212529;font-size:14px;">{line.Product.Name}</td>

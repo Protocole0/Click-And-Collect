@@ -68,11 +68,11 @@ namespace ClickAndCollect.Models
             set => _client = value;
         }
 
-        private int _storeId;
-        public int StoreId { get => _storeId; set => _storeId = value; }
+        private Store? _store;
+        public Store? Store { get => _store; set => _store = value; }
 
-        private int _timeSlotId;
-        public int TimeSlotId { get => _timeSlotId; set => _timeSlotId = value; }
+        private TimeSlot? _slot;
+        public TimeSlot? Slot { get => _slot; set => _slot = value; }
 
         // --- Constructeurs ---
 
@@ -100,7 +100,7 @@ namespace ClickAndCollect.Models
         // Constructeur complet pour valider une commande client
         public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned,
                      OrderStatus status, Client client, List<OrderLine> lines,
-                     int storeId, int timeSlotId)
+                     Store store, TimeSlot slot)
         {
             _id             = id;
             _orderDate      = orderDate;
@@ -109,8 +109,8 @@ namespace ClickAndCollect.Models
             _status         = status;
             _client         = client;
             _lines          = lines;
-            _storeId        = storeId;
-            _timeSlotId     = timeSlotId;
+            _store          = store;
+            _slot           = slot;
         }
 
         public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned, OrderStatus status, Client client)
@@ -139,8 +139,7 @@ namespace ClickAndCollect.Models
         {
             decimal total = 0;
             foreach (OrderLine line in _lines)
-                total += line.Quantity * line.Product.Price;
-
+                total += line.GetSubTotal();
             return total;
         }
 
@@ -199,6 +198,11 @@ namespace ClickAndCollect.Models
         public static async Task<List<Order>> GetAllOrdersAsync(IOrderDAL orderDAL, OrderStatus status)
         {
             return await orderDAL.GetAllOrdersAsync(status);
+        }
+
+        public static async Task<List<Order>> GetOrdersByClientAsync(IOrderDAL orderDAL, int clientId)
+        {
+            return await orderDAL.GetOrdersByClientAsync(clientId);
         }
 
         public static async Task<Order> GetOrderAsync(IOrderDAL orderDAL, int orderId)

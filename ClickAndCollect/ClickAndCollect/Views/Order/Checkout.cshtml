@@ -26,7 +26,7 @@
                                 <div class="fw-semibold small">@line.Product.Name</div>
                                 <div class="text-muted small">@line.Quantity</div>
                             </div>
-                            <div class="fw-semibold text-success small">@line.SubTotal.ToString("0.00") €</div>
+                            <div class="fw-semibold text-success small">@line.GetSubTotal().ToString("0.00") €</div>
                         </div>
                     }
 
