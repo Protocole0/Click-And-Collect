@@ -1,4 +1,4 @@
-﻿using ClickAndCollect.Interfaces;
+using ClickAndCollect.Interfaces;
 using ClickAndCollect.Models;
 using ClickAndCollect.ViewModels;
 using Microsoft.Data.SqlClient;
@@ -14,7 +14,6 @@ namespace ClickAndCollect.DAL
             _connectionString = connectionString;
         }
 
-        // Get all orders with a specific status, including client information
         public async Task<List<OrderViewModel>> GetAllOrdersAsync(OrderStatus status, int storeId)
         {
             List<OrderViewModel> orders = new List<OrderViewModel>();
@@ -22,19 +21,19 @@ namespace ClickAndCollect.DAL
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 string query =
-                @"SELECT 
+                @"SELECT
                    o.order_id, o.order_date, o.crates_used, o.crates_returned, o.status,
                    c.first_name, c.last_name, c.phone_number,
                    SUM(ol.quantity) AS total_items,
                    t.date_slot AS book_date, t.start_time AS book_start, t.end_time AS book_end
-                FROM dbo.Orders o
-                JOIN dbo.Client c ON o.user_id = c.user_id
-                JOIN dbo.Order_line ol ON o.order_id = ol.order_id
-                JOIN dbo.Time_slot t ON o.time_slot_id = t.time_slot_id
+                FROM orders o
+                JOIN client c      ON o.client_id    = c.client_id
+                JOIN order_line ol ON o.order_id     = ol.order_id
+                JOIN time_slot t   ON o.time_slot_id = t.time_slot_id
                 WHERE o.status = @status
                 AND o.store_id = @storeId
                 AND CAST(t.date_slot AS DATE) = CAST(DATEADD(day, 1, GETDATE()) AS DATE)
-                GROUP BY 
+                GROUP BY
                    o.order_id, o.order_date, o.crates_used, o.crates_returned, o.status,
                    c.first_name, c.last_name, c.phone_number,
                    t.date_slot, t.start_time, t.end_time
@@ -46,31 +45,31 @@ namespace ClickAndCollect.DAL
                 await connection.OpenAsync();
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
-                    int orderIdOrd = reader.GetOrdinal("order_id");
-                    int orderDateOrd = reader.GetOrdinal("order_date");
-                    int statusOrd = reader.GetOrdinal("status");
+                    int orderIdOrd         = reader.GetOrdinal("order_id");
+                    int orderDateOrd       = reader.GetOrdinal("order_date");
+                    int statusOrd          = reader.GetOrdinal("status");
                     int clientFirstnameOrd = reader.GetOrdinal("first_name");
-                    int clientLastnameOrd = reader.GetOrdinal("last_name");
-                    int clientPhoneNumberOrd = reader.GetOrdinal("phone_number");
-                    int totalItemsOrd = reader.GetOrdinal("total_items");
-                    int bookDateOrd = reader.GetOrdinal("book_date");
-                    int bookStartOrd = reader.GetOrdinal("book_start");
-                    int bookEndOrd = reader.GetOrdinal("book_end");
+                    int clientLastnameOrd  = reader.GetOrdinal("last_name");
+                    int clientPhoneOrd     = reader.GetOrdinal("phone_number");
+                    int totalItemsOrd      = reader.GetOrdinal("total_items");
+                    int bookDateOrd        = reader.GetOrdinal("book_date");
+                    int bookStartOrd       = reader.GetOrdinal("book_start");
+                    int bookEndOrd         = reader.GetOrdinal("book_end");
 
                     while (await reader.ReadAsync())
                     {
                         orders.Add(new OrderViewModel
                         {
-                            OrderId = reader.GetInt32(orderIdOrd),
-                            OrderDate = reader.GetDateTime(orderDateOrd),
-                            OrderStatus = (OrderStatus)Enum.Parse(typeof(OrderStatus), reader.GetString(statusOrd), true),
-                            ClientFirstname = reader.GetString(clientFirstnameOrd),
-                            ClientLastname = reader.GetString(clientLastnameOrd),
-                            ClientPhoneNumber = reader.GetString(clientPhoneNumberOrd),
-                            TotalItems = reader.GetInt32(totalItemsOrd),
-                            BookDate = reader.GetDateTime(bookDateOrd),
-                            BookStart = reader.GetTimeSpan(bookStartOrd),
-                            BookEnd = reader.GetTimeSpan(bookEndOrd)
+                            OrderId           = reader.GetInt32(orderIdOrd),
+                            OrderDate         = reader.GetDateTime(orderDateOrd),
+                            OrderStatus       = (OrderStatus)Enum.Parse(typeof(OrderStatus), reader.GetString(statusOrd), true),
+                            ClientFirstname   = reader.GetString(clientFirstnameOrd),
+                            ClientLastname    = reader.GetString(clientLastnameOrd),
+                            ClientPhoneNumber = reader.GetString(clientPhoneOrd),
+                            TotalItems        = reader.GetInt32(totalItemsOrd),
+                            BookDate          = reader.GetDateTime(bookDateOrd),
+                            BookStart         = reader.GetTimeSpan(bookStartOrd),
+                            BookEnd           = reader.GetTimeSpan(bookEndOrd)
                         });
                     }
                 }
@@ -79,20 +78,19 @@ namespace ClickAndCollect.DAL
             return orders;
         }
 
-        // Get order lines for a specific order 
         public async Task<Order> GetOrderAsync(int orderId)
         {
             string query = @"
                 SELECT o.order_id,
-                       l.quantity, 
+                       l.quantity,
                        p.name AS product_name, p.image_url AS product_image,
                        c.name AS category_name,
                        cl.first_name AS client_firstname, cl.last_name AS client_lastname
                 FROM dbo.Orders o
-                LEFT JOIN dbo.Order_line l ON o.order_id = l.order_id
-                LEFT JOIN dbo.Product p ON l.product_id = p.product_id
-                LEFT JOIN dbo.Category c ON p.category_id = c.category_id
-                LEFT JOIN dbo.Client cl ON o.client_id = cl.client_id
+                LEFT JOIN dbo.Order_line l  ON o.order_id    = l.order_id
+                LEFT JOIN dbo.Product p     ON l.product_id  = p.product_id
+                LEFT JOIN dbo.Category c    ON p.category_id = c.category_id
+                LEFT JOIN dbo.Client cl     ON o.client_id   = cl.client_id
                 WHERE o.order_id = @orderId";
 
             Order? order = null;
@@ -104,13 +102,13 @@ namespace ClickAndCollect.DAL
                 await connection.OpenAsync();
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
-                    int orderIdOrd = reader.GetOrdinal("order_id");
-                    int quantityOrd = reader.GetOrdinal("quantity");
-                    int productNameOrd = reader.GetOrdinal("product_name");
-                    int productImageOrd = reader.GetOrdinal("product_image");
-                    int categoryNameOrd = reader.GetOrdinal("category_name");
+                    int orderIdOrd         = reader.GetOrdinal("order_id");
+                    int quantityOrd        = reader.GetOrdinal("quantity");
+                    int productNameOrd     = reader.GetOrdinal("product_name");
+                    int productImageOrd    = reader.GetOrdinal("product_image");
+                    int categoryNameOrd    = reader.GetOrdinal("category_name");
                     int clientFirstnameOrd = reader.GetOrdinal("client_firstname");
-                    int clientLastnameOrd = reader.GetOrdinal("client_lastname");
+                    int clientLastnameOrd  = reader.GetOrdinal("client_lastname");
 
                     while (await reader.ReadAsync())
                     {
@@ -118,56 +116,186 @@ namespace ClickAndCollect.DAL
                         {
                             order = new Order
                             {
-                                Id = reader.GetInt32(orderIdOrd),
+                                Id     = reader.GetInt32(orderIdOrd),
                                 Client = new Client(reader.GetString(clientFirstnameOrd), reader.GetString(clientLastnameOrd))
                             };
                         }
 
                         Product p = new Product
                         {
-                            Name = reader.GetString(productNameOrd),
+                            Name     = reader.GetString(productNameOrd),
                             ImageUrl = reader.GetString(productImageOrd),
                             Category = new Category(reader.GetString(categoryNameOrd))
                         };
-                        OrderLine line = new OrderLine
-                        {
-                            Product = p,
-                            Quantity = quantityOrd,
-                        };
 
-                        order.Lines.Add(line);
+                        order.Lines.Add(new OrderLine { Product = p, Quantity = reader.GetInt32(quantityOrd) });
                     }
                 }
             }
 
-            return order;
+            return order!;
         }
-        
-        public async Task<bool> UpdateCratesUsed(int orderId, int cratesCount, OrderStatus status)
+
+        public async Task<List<Order>> GetOrdersByClientAsync(int clientId)
         {
-            bool success = false;
+            var dict = new Dictionary<int, Order>();
 
-            string query = @"
-                UPDATE dbo.Orders
-                SET 
-                    status=@status,
-                    crates_used=@cratesCount
-                WHERE order_id = @orderId";
+            using SqlConnection conn = new SqlConnection(_connectionString);
+            await conn.OpenAsync();
+            SqlCommand cmd = new SqlCommand(
+                @"SELECT o.order_id, o.order_date, o.crates_used, o.crates_returned, o.status,
+                         s.store_id, s.name AS store_name, s.street_name, s.street_number, s.city, s.postal_code,
+                         ts.time_slot_id, ts.date_slot, ts.start_time, ts.end_time,
+                         ol.order_line_id, ol.quantity, ol.unit_price,
+                         p.product_id, p.name AS product_name, p.image_url, p.price
+                  FROM orders o
+                  JOIN store s            ON o.store_id      = s.store_id
+                  JOIN time_slot ts       ON o.time_slot_id  = ts.time_slot_id
+                  LEFT JOIN order_line ol ON ol.order_id     = o.order_id
+                  LEFT JOIN product p     ON ol.product_id   = p.product_id
+                  WHERE o.client_id = @clientId
+                  ORDER BY o.order_date DESC",
+                conn);
+            cmd.Parameters.AddWithValue("@clientId", clientId);
 
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+            int ordIdOrd    = reader.GetOrdinal("order_id");
+            int dateOrd     = reader.GetOrdinal("order_date");
+            int crUsedOrd   = reader.GetOrdinal("crates_used");
+            int crRetOrd    = reader.GetOrdinal("crates_returned");
+            int statusOrd   = reader.GetOrdinal("status");
+            int storeIdOrd  = reader.GetOrdinal("store_id");
+            int stNameOrd   = reader.GetOrdinal("store_name");
+            int stStreetOrd = reader.GetOrdinal("street_name");
+            int stNumOrd    = reader.GetOrdinal("street_number");
+            int stCityOrd   = reader.GetOrdinal("city");
+            int stZipOrd    = reader.GetOrdinal("postal_code");
+            int tsIdOrd     = reader.GetOrdinal("time_slot_id");
+            int tsDateOrd   = reader.GetOrdinal("date_slot");
+            int tsStartOrd  = reader.GetOrdinal("start_time");
+            int tsEndOrd    = reader.GetOrdinal("end_time");
+            int olIdOrd     = reader.GetOrdinal("order_line_id");
+            int olQtyOrd    = reader.GetOrdinal("quantity");
+            int pIdOrd      = reader.GetOrdinal("product_id");
+            int pNameOrd    = reader.GetOrdinal("product_name");
+            int pImgOrd     = reader.GetOrdinal("image_url");
+            int pPriceOrd   = reader.GetOrdinal("price");
+
+            while (await reader.ReadAsync())
             {
-                SqlCommand cmd = new SqlCommand(query, connection);
-                cmd.Parameters.AddWithValue("@status", status.ToString());
-                cmd.Parameters.AddWithValue("@cratesCount", cratesCount);
-                cmd.Parameters.AddWithValue("@orderId", orderId);
+                int orderId = reader.GetInt32(ordIdOrd);
 
-                await connection.OpenAsync();
+                if (!dict.TryGetValue(orderId, out Order? order))
+                {
+                    var store = new Store(
+                        reader.GetInt32(storeIdOrd),
+                        reader.GetString(stNameOrd),
+                        reader.GetString(stStreetOrd),
+                        reader.GetString(stNumOrd),
+                        reader.GetString(stCityOrd),
+                        reader.GetString(stZipOrd));
 
-                int res = await cmd.ExecuteNonQueryAsync();
-                success = res > 0;
+                    var slot = new TimeSlot(
+                        reader.GetInt32(tsIdOrd),
+                        reader.GetDateTime(tsDateOrd),
+                        reader.GetTimeSpan(tsStartOrd),
+                        reader.GetTimeSpan(tsEndOrd));
+
+                    order = new Order(
+                        orderId,
+                        reader.GetDateTime(dateOrd),
+                        reader.GetInt32(crUsedOrd),
+                        reader.GetInt32(crRetOrd),
+                        (OrderStatus)Enum.Parse(typeof(OrderStatus), reader.GetString(statusOrd)),
+                        null!,
+                        new List<OrderLine>(),
+                        store,
+                        slot);
+
+                    dict[orderId] = order;
+                }
+
+                if (!reader.IsDBNull(olIdOrd))
+                {
+                    var product = new Product(
+                        reader.GetInt32(pIdOrd),
+                        reader.GetString(pNameOrd),
+                        null,
+                        reader.GetDecimal(pPriceOrd),
+                        reader.GetString(pImgOrd),
+                        null,
+                        null);
+
+                    order.Lines.Add(new OrderLine(
+                        reader.GetInt32(olIdOrd),
+                        reader.GetInt32(olQtyOrd),
+                        product));
+                }
             }
 
-            return success;
+            return dict.Values.ToList();
+        }
+
+        public async Task CreateAsync(Order order)
+        {
+            using SqlConnection conn = new SqlConnection(_connectionString);
+            await conn.OpenAsync();
+            using SqlTransaction tx = (SqlTransaction)await conn.BeginTransactionAsync();
+            try
+            {
+                SqlCommand cmdOrder = new SqlCommand(
+                    "INSERT INTO orders (order_date, crates_used, crates_returned, status, client_id, time_slot_id, store_id) " +
+                    "OUTPUT INSERTED.order_id " +
+                    "VALUES (@date, @crates_used, @crates_returned, @status, @clientId, @timeSlotId, @storeId)",
+                    conn, tx);
+                cmdOrder.Parameters.AddWithValue("@date",            order.OrderDate);
+                cmdOrder.Parameters.AddWithValue("@crates_used",     order.CratesUsed);
+                cmdOrder.Parameters.AddWithValue("@crates_returned", order.CratesReturned);
+                cmdOrder.Parameters.AddWithValue("@status",          order.Status.ToString());
+                cmdOrder.Parameters.AddWithValue("@clientId",        order.Client!.Id);
+                cmdOrder.Parameters.AddWithValue("@timeSlotId",      order.Slot!.TimeSlotId);
+                cmdOrder.Parameters.AddWithValue("@storeId",         order.Store!.StoreId);
+
+                int orderId = (int)(await cmdOrder.ExecuteScalarAsync())!;
+
+                foreach (OrderLine line in order.Lines)
+                {
+                    SqlCommand cmdLine = new SqlCommand(
+                        "INSERT INTO order_line (quantity, unit_price, product_id, order_id) VALUES (@qty, @unitPrice, @productId, @orderId)",
+                        conn, tx);
+                    cmdLine.Parameters.AddWithValue("@qty",       line.Quantity);
+                    cmdLine.Parameters.AddWithValue("@unitPrice", line.Product.Price);
+                    cmdLine.Parameters.AddWithValue("@productId", line.Product.ProductId);
+                    cmdLine.Parameters.AddWithValue("@orderId",   orderId);
+                    await cmdLine.ExecuteNonQueryAsync();
+                }
+
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateCratesUsed(int orderId, int cratesCount, OrderStatus status)
+        {
+            string query = @"
+                UPDATE dbo.Orders
+                SET status      = @status,
+                    crates_used = @cratesCount
+                WHERE order_id  = @orderId";
+
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+            cmd.Parameters.AddWithValue("@status",      status.ToString());
+            cmd.Parameters.AddWithValue("@cratesCount", cratesCount);
+            cmd.Parameters.AddWithValue("@orderId",     orderId);
+            await connection.OpenAsync();
+            int res = await cmd.ExecuteNonQueryAsync();
+            return res > 0;
         }
     }
 }

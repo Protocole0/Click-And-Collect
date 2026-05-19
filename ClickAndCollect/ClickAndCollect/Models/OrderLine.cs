@@ -27,7 +27,10 @@ namespace ClickAndCollect.Models
             set => _checkbox = value;
         }
 
-        public decimal SubTotal => Quantity * Product.Price;
+        public decimal GetSubTotal()
+        {
+            return _quantity * _product.Price;
+        }
 
         public OrderLine() { _product = new Product(); }
 

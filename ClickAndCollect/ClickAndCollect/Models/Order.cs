@@ -69,11 +69,11 @@ namespace ClickAndCollect.Models
             set => _client = value;
         }
 
-        private int _storeId;
-        public int StoreId { get => _storeId; set => _storeId = value; }
+        private Store? _store;
+        public Store? Store { get => _store; set => _store = value; }
 
-        private int _timeSlotId;
-        public int TimeSlotId { get => _timeSlotId; set => _timeSlotId = value; }
+        private TimeSlot? _slot;
+        public TimeSlot? Slot { get => _slot; set => _slot = value; }
 
         // --- Constructeurs ---
 
@@ -84,9 +84,28 @@ namespace ClickAndCollect.Models
 
         public Order(int id, Client client)
         {
-            _id    = id;
-            _client = client;
-            _lines = new List<OrderLine>();
+            _id             = id;
+            _client         = client;
+            _cratesUsed     = 0;
+            _cratesReturned = 0;
+            _status         = OrderStatus.PENDING_PREPARATION;
+            _lines          = new List<OrderLine>();
+        }
+
+        // Constructeur complet pour valider une commande client
+        public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned,
+                     OrderStatus status, Client client, List<OrderLine> lines,
+                     Store store, TimeSlot slot)
+        {
+            _id             = id;
+            _orderDate      = orderDate;
+            _cratesUsed     = cratesUsed;
+            _cratesReturned = cratesReturned;
+            _status         = status;
+            _client         = client;
+            _lines          = lines;
+            _store          = store;
+            _slot           = slot;
         }
 
         public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned, OrderStatus status, Client client)
@@ -118,8 +137,7 @@ namespace ClickAndCollect.Models
         {
             decimal total = 0;
             foreach (OrderLine line in _lines)
-                total += line.Quantity * line.Product.Price;
-
+                total += line.GetSubTotal();
             return total;
         }
 
@@ -180,9 +198,19 @@ namespace ClickAndCollect.Models
             return await orderDAL.GetAllOrdersAsync(status, storeId);
         }
 
+        public static async Task<List<Order>> GetOrdersByClientAsync(IOrderDAL orderDAL, int clientId)
+        {
+            return await orderDAL.GetOrdersByClientAsync(clientId);
+        }
+
         public static async Task<Order> GetOrderAsync(IOrderDAL orderDAL, int orderId)
         {
             return await orderDAL.GetOrderAsync(orderId);
+        }
+
+        public async Task PlaceOrder(IOrderDAL orderDAL)
+        {
+            await orderDAL.CreateAsync(this);
         }
 
         public async Task<bool> UpdateCratesUsed(IOrderDAL orderDAL, int orderId, int cratesCount, int checkedProductsCount, OrderStatus status)

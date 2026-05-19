@@ -16,6 +16,7 @@ namespace ClickAndCollect.Controllers
         public const string SessionKeyLastname  = "client_lastname";
         public const string SessionKeyUserType  = "user_type";
         public const string SessionKeyEmail     = "client_email";
+        public const string SessionKeyStoreId   = "store_id";
 
         public AccountController(IUserDAL userDAL, IEmailService emailService)
         {
@@ -94,6 +95,7 @@ namespace ClickAndCollect.Controllers
             HttpContext.Session.Remove(SessionKeyLastname);
             HttpContext.Session.Remove(SessionKeyUserType);
             HttpContext.Session.Remove(SessionKeyEmail);
+            HttpContext.Session.Remove(SessionKeyStoreId);
             return RedirectToAction("Index", "Home");
         }
 
@@ -106,6 +108,8 @@ namespace ClickAndCollect.Controllers
             HttpContext.Session.SetString(SessionKeyLastname,  client.Lastname);
             HttpContext.Session.SetString(SessionKeyUserType,  client.UserType);
             HttpContext.Session.SetString(SessionKeyEmail,     client.Email);
+            if (client.StoreId.HasValue)
+                HttpContext.Session.SetInt32(SessionKeyStoreId, client.StoreId.Value);
         }
 
         private IActionResult RedirectBasedOnRole(ISession session)

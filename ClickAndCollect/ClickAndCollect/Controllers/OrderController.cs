@@ -93,6 +93,13 @@ namespace ClickAndCollect.Controllers
             // Construire le client via son constructeur
             var client = new Client(clientId, firstname, lastname, string.Empty);
 
+            // Récupérer le magasin et le créneau pour les passer à la commande
+            Store?    store = await Store.GetById(storeId, _storeDAL);
+            TimeSlot? slot  = await TimeSlot.GetById(timeSlotId, _timeSlotDAL);
+
+            if (store == null || slot == null)
+                return RedirectToAction("Checkout");
+
             // Construire chaque ligne via le constructeur OrderLine(Product, quantity)
             var lines = cart.Lines
                 .Select(l => new OrderLine(l.Product, l.Quantity))
@@ -107,17 +114,15 @@ namespace ClickAndCollect.Controllers
                 status:         OrderStatus.PENDING_PREPARATION,
                 client:         client,
                 lines:          lines,
-                storeId:        storeId,
-                timeSlotId:     timeSlotId);
+                store:          store,
+                slot:           slot);
 
             // Persister via la méthode d'instance
             await order.PlaceOrder(_orderDAL);
 
-            // Envoyer l'email de confirmation (on récupère le magasin et le créneau pour le détail)
-            Store?    confirmedStore = await Store.GetById(storeId, _storeDAL);
-            TimeSlot? confirmedSlot  = await TimeSlot.GetById(timeSlotId, _timeSlotDAL);
-            if (confirmedStore != null && confirmedSlot != null && !string.IsNullOrEmpty(email))
-                await _emailService.SendOrderConfirmationEmailAsync(email, firstname, lastname, order, confirmedStore, confirmedSlot);
+            // Envoyer l'email de confirmation
+            if (!string.IsNullOrEmpty(email))
+                await _emailService.SendOrderConfirmationEmailAsync(email, firstname, lastname, order, order.Store!, order.Slot!);
 
             // Vider le panier session
             new Order().SaveToSession(HttpContext.Session);
@@ -129,6 +134,21 @@ namespace ClickAndCollect.Controllers
         public IActionResult Success()
         {
             return View();
+        }
+
+        // GET: /Order/History
+        public async Task<IActionResult> History()
+        {
+            if (!AccountController.IsLoggedIn(HttpContext.Session))
+                return RedirectToAction("Login", "Account");
+
+            if (AccountController.IsEmployee(HttpContext.Session))
+                return RedirectToAction("Index", "Home");
+
+            int clientId = HttpContext.Session.GetInt32(AccountController.SessionKeyId)!.Value;
+            List<Order> orders = await Order.GetOrdersByClientAsync(_orderDAL, clientId);
+
+            return View(orders);
         }
     }
 }
