@@ -23,6 +23,13 @@ namespace ClickAndCollect.Models
             PhoneNumber = phoneNumber;
         }
         
+        // Constructor just to display the name of the client when his order has been prepared
+        public Client(string firstname, string lastname)
+        {
+            Firstname = firstname;
+            Lastname = lastname;
+        }
+        
         // Constructor without the password parameter
         // To display non-sensible informations
         // Like the name in the order dashboard

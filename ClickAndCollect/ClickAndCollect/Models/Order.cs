@@ -1,6 +1,7 @@
 using ClickAndCollect.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
+using ClickAndCollect.ViewModels;
 
 namespace ClickAndCollect.Models
 {
@@ -14,7 +15,7 @@ namespace ClickAndCollect.Models
 
     public class Order
     {
-         public static decimal DefaultServiceFee = 5.95m;
+        public static decimal DefaultServiceFee = 5.95m;
 
         // --- Liste des lignes (panier session ET commande BD) ---
         private List<OrderLine> _lines;
@@ -75,20 +76,11 @@ namespace ClickAndCollect.Models
             _lines = new List<OrderLine>();
         }
 
-        public Order(int id)
-        {
-            _id    = id;
-            _lines = new List<OrderLine>();
-        }
-
         public Order(int id, Client client)
         {
-            _id             = id;
-            _client         = client;
-            _cratesUsed     = 0;
-            _cratesReturned = 0;
-            _status         = OrderStatus.PENDING_PREPARATION;
-            _lines          = new List<OrderLine>();
+            _id    = id;
+            _client = client;
+            _lines = new List<OrderLine>();
         }
 
         public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned, OrderStatus status, Client client)
@@ -101,6 +93,9 @@ namespace ClickAndCollect.Models
             _client         = client;
             _lines          = new List<OrderLine>();
         }
+
+
+
 
         // --- Méthodes panier (session) ---
 
@@ -172,14 +167,23 @@ namespace ClickAndCollect.Models
 
         // --- Méthodes BD (statiques) ---
 
-        public static async Task<List<Order>> GetAllOrdersAsync(IOrderDAL orderDAL, OrderStatus status)
+        public static async Task<List<OrderViewModel>> GetAllOrdersAsync(IOrderDAL orderDAL, OrderStatus status, int storeId)
         {
-            return await orderDAL.GetAllOrdersAsync(status);
+            return await orderDAL.GetAllOrdersAsync(status, storeId);
         }
 
         public static async Task<Order> GetOrderAsync(IOrderDAL orderDAL, int orderId)
         {
             return await orderDAL.GetOrderAsync(orderId);
+        }
+
+        public async Task<bool> UpdateCratesUsed(IOrderDAL orderDAL, int orderId, int cratesCount, int checkedProductsCount, OrderStatus status)
+        {
+            if(Lines.Count() == checkedProductsCount && cratesCount > 0)
+            {
+                return await orderDAL.UpdateCratesUsed(orderId, cratesCount, status);
+            }
+            return false;
         }
     }
 }
