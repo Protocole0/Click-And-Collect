@@ -24,6 +24,10 @@ namespace ClickAndCollect.Controllers
             // par le storeId de l'employé
             List<OrderViewModel> orders = await Order.GetAllOrdersAsync(_orderDAL, OrderStatus.PENDING_PREPARATION, 2);
 
+        // Cashier : commandes prêtes à récupérer
+        public async Task<IActionResult> Cashier()
+        {
+            List<Order> orders = await Order.GetAllOrdersAsync(_orderDAL, OrderStatus.READY_FOR_PICKUP);
             return View(orders);
         }
 

@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Globalization;
+using ClickAndCollect.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace ClickAndCollect.Models
 {
@@ -13,7 +13,7 @@ namespace ClickAndCollect.Models
 
         public Client()
         {
-            
+
         }
 
         public Client(int id, string firstname, string lastname, string email, string password, string phoneNumber): base(id, email, password)
@@ -40,5 +40,18 @@ namespace ClickAndCollect.Models
             PhoneNumber = phoneNumber;
         }
 
+        // --- Méthodes statiques : la classe délègue au DAL ---
+
+        public static async Task<bool> EmailExists(string email, IUserDAL userDAL)
+        {
+            return await userDAL.EmailExistsAsync(email);
+        }
+
+        // --- Méthode d'instance : l'objet Client communique avec le DAL ---
+
+        public async Task CreateAccount(IUserDAL userDAL)
+        {
+            await userDAL.CreateAsync(this);
+        }
     }
 }

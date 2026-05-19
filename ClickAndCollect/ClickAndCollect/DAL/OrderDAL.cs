@@ -92,7 +92,7 @@ namespace ClickAndCollect.DAL
                 LEFT JOIN dbo.Order_line l ON o.order_id = l.order_id
                 LEFT JOIN dbo.Product p ON l.product_id = p.product_id
                 LEFT JOIN dbo.Category c ON p.category_id = c.category_id
-                LEFT JOIN dbo.Client cl ON o.user_id = cl.user_id
+                LEFT JOIN dbo.Client cl ON o.client_id = cl.client_id
                 WHERE o.order_id = @orderId";
 
             Order? order = null;

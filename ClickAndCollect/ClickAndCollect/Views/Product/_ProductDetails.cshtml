@@ -67,7 +67,9 @@
                 <button class="btn btn-dark flex-grow-1 py-2"
                         id="btn-add-cart"
                         data-product-id="@Model.ProductId"
-                        data-unit-price="@Model.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">
+                        data-unit-price="@Model.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                        data-name="@Model.Name"
+                        data-image-url="@Model.ImageUrl">
                     <i class="bi bi-cart3 me-2"></i>Ajouter au panier — @Model.Price.ToString("0.00") €
                 </button>
             </div>

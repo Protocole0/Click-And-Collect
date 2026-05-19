@@ -64,10 +64,16 @@ namespace ClickAndCollect.Models
         }
 
         private Client? _client;
-        public Client? Client { 
-            get => _client; 
-            set => _client = value; 
+        public Client? Client {
+            get => _client;
+            set => _client = value;
         }
+
+        private int _storeId;
+        public int StoreId { get => _storeId; set => _storeId = value; }
+
+        private int _timeSlotId;
+        public int TimeSlotId { get => _timeSlotId; set => _timeSlotId = value; }
 
         // --- Constructeurs ---
 
@@ -104,6 +110,7 @@ namespace ClickAndCollect.Models
             int total = 0;
             foreach (OrderLine line in _lines)
                 total += line.Quantity;
+
             return total;
         }
 
@@ -112,6 +119,7 @@ namespace ClickAndCollect.Models
             decimal total = 0;
             foreach (OrderLine line in _lines)
                 total += line.Quantity * line.Product.Price;
+
             return total;
         }
 
@@ -165,7 +173,7 @@ namespace ClickAndCollect.Models
             session.SetString("cart", JsonSerializer.Serialize(this));
         }
 
-        // --- Méthodes BD (statiques) ---
+        // --- Méthodes BD ---
 
         public static async Task<List<OrderViewModel>> GetAllOrdersAsync(IOrderDAL orderDAL, OrderStatus status, int storeId)
         {
