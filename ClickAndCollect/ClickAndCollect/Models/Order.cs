@@ -141,6 +141,11 @@ namespace ClickAndCollect.Models
             return total;
         }
 
+        public decimal TotalWithServiceFee()
+        {
+            return TotalAmount() + DefaultServiceFee;
+        }
+
         public void AddProduct(Product product, int quantity)
         {
             foreach (OrderLine line in _lines)
