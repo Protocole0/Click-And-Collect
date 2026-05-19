@@ -11,6 +11,8 @@ namespace ClickAndCollect.Models
 
         public string PhoneNumber { get; set; }
 
+        public int? StoreId { get; set; }
+
         public Client()
         {
 

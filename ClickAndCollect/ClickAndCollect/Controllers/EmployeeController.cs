@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using ClickAndCollect.Models;
 using ClickAndCollect.ViewModels;
 using ClickAndCollect.Interfaces;
-using ClickAndCollect.DAL;
-using System.Threading.Tasks;
 
 namespace ClickAndCollect.Controllers
 {
@@ -16,18 +14,17 @@ namespace ClickAndCollect.Controllers
             _orderDAL = orderDAL;
         }
 
-        public async Task<IActionResult> Index() {
-            // Le storeId précisé est 2,
-            // mais quand j'aurai merge
-            // avec le système de connexion,
-            // je pourrai le remplacer
-            // par le storeId de l'employé
-            List<OrderViewModel> orders = await Order.GetAllOrdersAsync(_orderDAL, OrderStatus.PENDING_PREPARATION, 2);
+        public async Task<IActionResult> Index()
+        {
+            int storeId = HttpContext.Session.GetInt32("store_id") ?? 2;
+            List<OrderViewModel> orders = await Order.GetAllOrdersAsync(_orderDAL, OrderStatus.PENDING_PREPARATION, storeId);
+            return View(orders);
+        }
 
-        // Cashier : commandes prêtes à récupérer
         public async Task<IActionResult> Cashier()
         {
-            List<Order> orders = await Order.GetAllOrdersAsync(_orderDAL, OrderStatus.READY_FOR_PICKUP);
+            int storeId = HttpContext.Session.GetInt32("store_id") ?? 2;
+            List<OrderViewModel> orders = await Order.GetAllOrdersAsync(_orderDAL, OrderStatus.READY_FOR_PICKUP, storeId);
             return View(orders);
         }
 
@@ -35,7 +32,6 @@ namespace ClickAndCollect.Controllers
         public async Task<IActionResult> OrderContent(int orderId)
         {
             Order order = await Order.GetOrderAsync(_orderDAL, orderId);
-            
             return PartialView("_OrderContent", order);
         }
 
@@ -44,10 +40,10 @@ namespace ClickAndCollect.Controllers
         {
             Order orderPrepared = await Order.GetOrderAsync(_orderDAL, orderId);
 
-            int checkedProductsCount = checkedProducts.Count();
+            int  checkedProductsCount = checkedProducts.Count();
             bool success = await orderPrepared.UpdateCratesUsed(_orderDAL, orderId, cratesUsed, checkedProductsCount, OrderStatus.READY_FOR_PICKUP);
 
-            TempData["SuccessMessage"] = $"La commande n°{orderPrepared.Id} de {orderPrepared.Client.Firstname} {orderPrepared.Client.Lastname} a bien été validée et est prête au retrait !";
+            TempData["SuccessMessage"] = $"La commande n°{orderPrepared.Id} de {orderPrepared.Client!.Firstname} {orderPrepared.Client.Lastname} a bien été validée et est prête au retrait !";
 
             return RedirectToAction(nameof(Index));
         }
