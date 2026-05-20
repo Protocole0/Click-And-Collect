@@ -155,7 +155,7 @@ namespace ClickAndCollect.Services
                                   </tr>
                                   <tr style="border-top:1px solid #e9ecef;">
                                     <td style="padding:8px 0;color:#6c757d;font-size:14px;">🏠 Adresse</td>
-                                    <td style="padding:8px 0;color:#212529;font-size:14px;">{store.FullAddress}</td>
+                                    <td style="padding:8px 0;color:#212529;font-size:14px;">{store.FullAddress()}</td>
                                   </tr>
                                   <tr style="border-top:1px solid #e9ecef;">
                                     <td style="padding:8px 0;color:#6c757d;font-size:14px;">📅 Date</td>

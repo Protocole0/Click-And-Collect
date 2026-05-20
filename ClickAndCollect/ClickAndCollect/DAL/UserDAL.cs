@@ -14,15 +14,18 @@ namespace ClickAndCollect.DAL
             _connectionString = connectionString;
         }
 
-        public async Task<Client?> GetByEmailAndPasswordAsync(string email, string password)
+        public async Task<User?> GetByEmailAndPasswordAsync(string email, string password)
         {
             using SqlConnection conn = new SqlConnection(_connectionString);
             await conn.OpenAsync();
             SqlCommand cmd = new SqlCommand(
-                "SELECT u.user_type, u.password, u.email, c.client_id, c.first_name, c.last_name, c.phone_number, e.store_id " +
+                "SELECT u.user_id, u.user_type, u.password, u.email, " +
+                "       c.client_id, c.first_name, c.last_name, c.phone_number, " +
+                "       e.store_id, s.name AS store_name, s.street_name, s.street_number, s.city, s.postal_code " +
                 "FROM users u " +
-                "LEFT JOIN client c   ON u.user_id = c.user_id " +
-                "LEFT JOIN employee e ON u.user_id = e.user_id " +
+                "LEFT JOIN client   c ON u.user_id  = c.user_id " +
+                "LEFT JOIN employee e ON u.user_id  = e.user_id " +
+                "LEFT JOIN store    s ON e.store_id = s.store_id " +
                 "WHERE u.email = @email",
                 conn);
             cmd.Parameters.AddWithValue("@email", email);
@@ -35,24 +38,42 @@ namespace ClickAndCollect.DAL
             if (!BCrypt.Net.BCrypt.Verify(password, storedHash))
                 return null;
 
-            int clientIdOrd  = reader.GetOrdinal("client_id");
-            int typeOrd      = reader.GetOrdinal("user_type");
-            int emailOrd     = reader.GetOrdinal("email");
-            int firstnameOrd = reader.GetOrdinal("first_name");
-            int lastnameOrd  = reader.GetOrdinal("last_name");
-            int phoneOrd     = reader.GetOrdinal("phone_number");
-            int storeIdOrd   = reader.GetOrdinal("store_id");
+            string userType = reader.GetString(reader.GetOrdinal("user_type"));
+            string userEmail = reader.GetString(reader.GetOrdinal("email"));
+            int    userId   = reader.GetInt32(reader.GetOrdinal("user_id"));
 
-            string firstname = reader.IsDBNull(firstnameOrd) ? string.Empty : reader.GetString(firstnameOrd);
-            string lastname  = reader.IsDBNull(lastnameOrd)  ? string.Empty : reader.GetString(lastnameOrd);
-            string phone     = reader.IsDBNull(phoneOrd)     ? string.Empty : reader.GetString(phoneOrd);
+            User user;
 
-            int clientId = reader.IsDBNull(clientIdOrd) ? 0 : reader.GetInt32(clientIdOrd);
-            var client = new Client(clientId, firstname, lastname, phone);
-            client.UserType = reader.GetString(typeOrd);
-            client.Email    = reader.GetString(emailOrd);
-            client.StoreId  = reader.IsDBNull(storeIdOrd) ? null : reader.GetInt32(storeIdOrd);
-            return client;
+            if (userType == "client")
+            {
+                int    clientId  = reader.GetInt32(reader.GetOrdinal("client_id"));
+                string firstname = reader.GetString(reader.GetOrdinal("first_name"));
+                string lastname  = reader.GetString(reader.GetOrdinal("last_name"));
+                string phone     = reader.IsDBNull(reader.GetOrdinal("phone_number"))
+                                   ? string.Empty
+                                   : reader.GetString(reader.GetOrdinal("phone_number"));
+
+                var client = new Client(clientId, firstname, lastname, phone);
+                client.Email = userEmail;
+                user = client;
+            }
+            else
+            {
+                var store = new Store(
+                    reader.GetInt32(reader.GetOrdinal("store_id")),
+                    reader.GetString(reader.GetOrdinal("store_name")),
+                    reader.GetString(reader.GetOrdinal("street_name")),
+                    reader.GetString(reader.GetOrdinal("street_number")),
+                    reader.GetString(reader.GetOrdinal("city")),
+                    reader.GetString(reader.GetOrdinal("postal_code")));
+
+                user = userType == "cashier"
+                    ? new Cashier(userId, userEmail, store)
+                    : new OrderPicker(userId, userEmail, store);
+            }
+
+            user.UserType = userType;
+            return user;
         }
 
         public async Task<bool> EmailExistsAsync(string email)

@@ -42,13 +42,16 @@ namespace ClickAndCollect.Controllers
             if (!AccountController.IsLoggedIn(HttpContext.Session))
                 return Unauthorized();
 
-            List<DateTime> dates = await TimeSlot.GetAvailableDates(storeId, _timeSlotDAL);
+            List<TimeSlot> available = await TimeSlot.GetAvailableAsync(storeId, _timeSlotDAL);
 
-            var result = dates.Select(d => new
-            {
-                value = d.ToString("yyyy-MM-dd"),
-                label = d.ToString("dddd d MMMM yyyy", new CultureInfo("fr-FR"))
-            });
+            var result = available
+                .Select(s => s.DateSlot.Date)
+                .Distinct()
+                .Select(d => new
+                {
+                    value = d.ToString("yyyy-MM-dd"),
+                    label = d.ToString("dddd d MMMM yyyy", new CultureInfo("fr-FR"))
+                });
 
             return Json(result);
         }
@@ -61,7 +64,8 @@ namespace ClickAndCollect.Controllers
                 return Unauthorized();
 
             DateTime parsedDate = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-            List<TimeSlot> slots = await TimeSlot.GetAvailableByDate(parsedDate, storeId, _timeSlotDAL);
+            List<TimeSlot> available = await TimeSlot.GetAvailableAsync(storeId, _timeSlotDAL);
+            List<TimeSlot> slots = available.Where(s => s.DateSlot.Date == parsedDate.Date).ToList();
 
             var result = slots.Select(s => new
             {
