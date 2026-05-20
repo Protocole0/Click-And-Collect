@@ -40,14 +40,14 @@ namespace ClickAndCollect.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            Client? client = await Models.User.Login(model.Email, model.Password, _userDAL);
-            if (client == null)
+            User? user = await Models.User.Login(model.Email, model.Password, _userDAL);
+            if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "Email ou mot de passe incorrect.");
                 return View(model);
             }
 
-            StoreClientInSession(client);
+            StoreUserInSession(user);
             return RedirectBasedOnRole(HttpContext.Session);
         }
 
@@ -78,9 +78,9 @@ namespace ClickAndCollect.Controllers
 
             await _emailService.SendWelcomeEmailAsync(model.Email, model.Firstname, model.Lastname, model.Email);
 
-            Client? created = await Models.User.Login(model.Email, model.Password, _userDAL);
+            User? created = await Models.User.Login(model.Email, model.Password, _userDAL);
             if (created != null)
-                StoreClientInSession(created);
+                StoreUserInSession(created);
 
             return RedirectToAction("Index", "Home");
         }
@@ -101,15 +101,25 @@ namespace ClickAndCollect.Controllers
 
         // --- Helpers ---
 
-        private void StoreClientInSession(Client client)
+        private void StoreUserInSession(User user)
         {
-            HttpContext.Session.SetInt32(SessionKeyId,         client.Id);
-            HttpContext.Session.SetString(SessionKeyFirstname, client.Firstname);
-            HttpContext.Session.SetString(SessionKeyLastname,  client.Lastname);
-            HttpContext.Session.SetString(SessionKeyUserType,  client.UserType);
-            HttpContext.Session.SetString(SessionKeyEmail,     client.Email);
-            if (client.StoreId.HasValue)
-                HttpContext.Session.SetInt32(SessionKeyStoreId, client.StoreId.Value);
+            HttpContext.Session.SetInt32(SessionKeyId,        user.Id);
+            HttpContext.Session.SetString(SessionKeyUserType, user.UserType);
+            HttpContext.Session.SetString(SessionKeyEmail,    user.Email);
+
+            if (user is Client client)
+            {
+                HttpContext.Session.SetString(SessionKeyFirstname, client.Firstname);
+                HttpContext.Session.SetString(SessionKeyLastname,  client.Lastname);
+            }
+            else if (user is Cashier cashier && cashier.Store != null)
+            {
+                HttpContext.Session.SetInt32(SessionKeyStoreId, cashier.Store.StoreId);
+            }
+            else if (user is OrderPicker picker && picker.Store != null)
+            {
+                HttpContext.Session.SetInt32(SessionKeyStoreId, picker.Store.StoreId);
+            }
         }
 
         private IActionResult RedirectBasedOnRole(ISession session)

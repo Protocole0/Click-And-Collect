@@ -36,7 +36,7 @@ namespace ClickAndCollect.Models
 
         protected User()
         {
-            
+
         }
 
         public User(int id, string email, string password)
@@ -45,9 +45,7 @@ namespace ClickAndCollect.Models
             Email = email;
             Password = password;
         }
-        
-        // Constructor to get the client of an Order
-        // We just needs his id, and his last and first name
+
         public User(int id)
         {
             Id = id;
@@ -55,9 +53,7 @@ namespace ClickAndCollect.Models
 
         // --- Méthode statique : la classe délègue au DAL ---
 
-        public static async Task<Client?> Login(string email, string password, IUserDAL userDAL)
-        {
-            return await userDAL.GetByEmailAndPasswordAsync(email, password);
-        }
+        public static async Task<User?> Login(string email, string password, IUserDAL userDAL)
+            => await userDAL.GetByEmailAndPasswordAsync(email, password);
     }
 }

@@ -22,8 +22,6 @@ namespace ClickAndCollect.Models
         private string _postalCode;
         public string PostalCode { get => _postalCode; set => _postalCode = value; }
 
-        public string FullAddress => $"{_streetName} {_streetNumber}, {_postalCode} {_city}";
-
         public Store() { _name = _streetName = _streetNumber = _city = _postalCode = string.Empty; }
 
         public Store(int storeId, string name, string streetName, string streetNumber, string city, string postalCode)
@@ -35,6 +33,8 @@ namespace ClickAndCollect.Models
             _city         = city;
             _postalCode   = postalCode;
         }
+
+        public string FullAddress() => $"{_streetName} {_streetNumber}, {_postalCode} {_city}";
 
         // --- Méthodes statiques : la classe délègue au DAL ---
 

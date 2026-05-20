@@ -59,27 +59,15 @@ namespace ClickAndCollect.Models
             return await timeSlotDAL.GetByIdAsync(timeSlotId);
         }
 
-        // Dates ayant au moins un créneau disponible (règle : < 10 réservations)
-        public static async Task<List<DateTime>> GetAvailableDates(int storeId, ITimeSlotDAL timeSlotDAL)
+        // Tous les créneaux disponibles d'un magasin (règle : < 10 réservations)
+        public static async Task<List<TimeSlot>> GetAvailableAsync(int storeId, ITimeSlotDAL timeSlotDAL)
         {
             List<TimeSlot> all = await timeSlotDAL.GetFutureWithCountsAsync(storeId);
 
             return all
                 .Where(s => s.IsAvailable)
-                .Select(s => s._dateSlot.Date)
-                .Distinct()
-                .OrderBy(d => d)
-                .ToList();
-        }
-
-        // Créneaux disponibles pour une date donnée (règle : < 10 réservations)
-        public static async Task<List<TimeSlot>> GetAvailableByDate(DateTime date, int storeId, ITimeSlotDAL timeSlotDAL)
-        {
-            List<TimeSlot> all = await timeSlotDAL.GetFutureWithCountsAsync(storeId);
-
-            return all
-                .Where(s => s._dateSlot.Date == date.Date && s.IsAvailable)
-                .OrderBy(s => s._startTime)
+                .OrderBy(s => s._dateSlot)
+                .ThenBy(s => s._startTime)
                 .ToList();
         }
     }
