@@ -63,6 +63,9 @@ namespace ClickAndCollect.Models
         // --- Constructeurs ---
 
         public Product() { _name = string.Empty; }
+        
+        // Constructor with the price only, for the cashier
+        public Product(decimal price) { _price = price; }
 
         // Constructeur utilisé par OrderDAL (nom + image + catégorie uniquement)
         public Product(string name, string? imageUrl, Category? category)

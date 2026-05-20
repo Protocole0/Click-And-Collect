@@ -1,0 +1,89 @@
+﻿@using ClickAndCollect.ViewModels;
+@model Order
+@{
+    var totalItems = Model.TotalItems();
+    var clientName = $"- {Model.Client.Firstname} {Model.Client.Lastname}";
+    var clientPhone = Model.Client.PhoneNumber;
+}
+
+<form id="cashier-form" asp-action="ValidatePickUp" asp-route-orderId="@Model.Id" method="post">
+    <div class="modal-body px-5 pb-4 pt-4">
+
+        <div id="step-1-body" class="fade-in">
+            <h5 class="fw-bold text-dark mb-4 text-center mt-2">
+                <i class="bi bi-receipt text-success me-2"></i>Détails du paiement
+            </h5>
+
+            <div class="bg-light p-4 rounded-4 mb-4 border border-secondary border-opacity-10">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Produits (@totalItems articles) HT</span>
+                    <span class="fw-medium text-dark">@Model.GetHTTotalPrice().ToString("0.00") €</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Consigne (@Model.CratesUsed caisses)</span>
+                    <span class="fw-medium text-dark">@((Model.CratesUsed * 5.95m).ToString("0.00")) €</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                    <span class="text-muted">Frais de service</span>
+                    <span class="fw-medium text-dark">@Order.DefaultServiceFee.ToString("0.00") €</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-uppercase fw-bold text-success" style="letter-spacing: 1px;">Total dû</span>
+                    <span class="fs-3 fw-black text-success">@Model.GetTTCTotalPrice().ToString("0.00") €</span>
+                </div>
+            </div>
+
+            <div class="card border-0 bg-info bg-opacity-10 rounded-4 shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="bg-white text-info rounded-circle d-flex align-items-center justify-content-center shadow-sm me-4" style="width: 55px; height: 55px;">
+                        <i class="bi bi-arrow-counterclockwise fs-3"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <label for="crates-returned" class="fw-bold text-dark mb-1 d-block fs-5">Caisses ramenées</label>
+                        <p class="text-muted small mb-0">Caisses rendues par le client aujourd'hui</p>
+                    </div>
+                    <div style="width: 120px;">
+                        <input type="number" name="cratesReturned" id="crates-returned" class="form-control form-control-lg text-center border-info border-opacity-50 shadow-sm rounded-3 fw-bold text-info" value="0" min="0" max="@Model.CratesUsed" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="step-2-body" class="d-none fade-in pt-3">
+            <div class="text-center mb-4">
+                <p class="text-muted px-3">Voulez-vous vraiment valider la remise et le paiement de cette commande ?</p>
+            </div>
+
+            <div class="card border-0 bg-light rounded-4 shadow-sm mb-2 text-start">
+                <div class="card-body p-4">
+                    <div class="mb-4 pb-4 border-bottom border-secondary border-opacity-10">
+                        <small class="text-muted d-block mb-1">Commande</small>
+                        <span class="fw-bold text-dark fs-6">#@Model.Id @clientName</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block mb-1">Caisses retournées enregistrées</small>
+                        <span class="fw-bold text-dark fs-6" id="summary-crates-returned">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-footer border-0 px-5 pb-5 pt-0 d-flex flex-column gap-2 bg-white">
+        <div id="step-1-footer" class="w-100 fade-in">
+            <button type="button" id="btn-show-confirm" class="btn btn-success w-100 py-3 fw-bold rounded-4 shadow-sm fs-5">
+                Valider le retrait
+            </button>
+        </div>
+
+        <div id="step-2-footer" class="w-100 d-none fade-in d-flex flex-column gap-3">
+            <button type="submit" class="btn btn-success w-100 py-3 fw-bold rounded-4 shadow-sm fs-5">
+                Confirmer l'encaissement
+            </button>
+            <button type="button" id="btn-back-to-summary" class="btn btn-light border w-100 py-3 fw-bold rounded-4 text-dark shadow-sm">
+                Retour
+            </button>
+        </div>
+    </div>
+</form>

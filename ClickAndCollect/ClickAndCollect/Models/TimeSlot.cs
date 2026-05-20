@@ -31,9 +31,6 @@ namespace ClickAndCollect.Models
 
         public int Reservations { get; set; }
 
-        public string Label =>
-            $"{_dateSlot.ToString("dddd d MMMM", new CultureInfo("fr-FR"))} — {_startTime:hh\\:mm} → {_endTime:hh\\:mm}";
-
         public TimeSlot() { }
 
         public TimeSlot(int timeSlotId, DateTime dateSlot, TimeSpan startTime, TimeSpan endTime)
