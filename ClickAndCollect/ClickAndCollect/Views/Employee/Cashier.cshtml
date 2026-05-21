@@ -106,62 +106,172 @@
 </div>
 
 @section Scripts {
-    <script>
-        document.addEventListener('click', function (e) {
-            var trigger = e.target.closest('.cashier-preview-trigger');
-            if (!trigger) return;
-            e.preventDefault();
+<script>
+    @* -- Show the order bill -- *@
+    @* The JS is listenning the click on the link *@
+    document.addEventListener('click', function (e) {
+        @* Here, JS try to find this class, even if the item clicked is indoor the class *@
+        var trigger = e.target.closest('.cashier-preview-trigger');
+        @* If JS didn't find the class at the emplacement clicked, the JS get out the function *@
+        if (!trigger)
+            return;
+        @* Prevents the default behaviour of the link *@
+        e.preventDefault();
 
-            var modal = new bootstrap.Modal(document.getElementById('cashierModal'));
-            var header = document.getElementById('cashierModalHeader');
-            var content = document.getElementById('cashierModalContent');
+        var modal = new bootstrap.Modal(document.getElementById('cashierModal'));
+        var header = document.getElementById('cashierModalHeader');
+        var content = document.getElementById('cashierModalContent');
 
-            header.innerHTML =
-                '<h3 class="fw-bold text-dark mb-1" id="modal-dynamic-title-cashier">' + trigger.dataset.clientname + '</h3>' +
-                '<p class="text-muted small mb-0">Commande #' + trigger.dataset.orderid + ' &bull; ' + trigger.dataset.clientphone + '</p>';
+        @* Once the modal window get, the header of it must be changed *@
+        header.innerHTML =
+            '<h3 class="fw-bold text-dark mb-1" id="modal-dynamic-title-cashier">' + trigger.dataset.clientname + '</h3>' +
+            '<p class="text-muted small mb-0">Commande #' + trigger.dataset.orderid + ' &bull; ' + trigger.dataset.clientphone + '</p>';
 
-            content.innerHTML = '<div class="modal-body text-center py-5"><div class="spinner-border text-success" role="status"></div></div>';
-            modal.show();
+        @* A spinner is added while the modal window loads *@
+        content.innerHTML = '<div class="modal-body text-center py-5"><div class="spinner-border text-success" role="status"></div></div>';
+        @* This Bootstrap method is used to show the modal block *@
+        modal.show();
 
-            fetch('/Employee/OrderData?orderId=' + trigger.dataset.orderid)
-                .then(r => r.text())
-                .then(html => { content.innerHTML = html; })
-                .catch(() => { content.innerHTML = '<div class="p-5 text-center text-danger">Erreur de chargement.</div>'; });
-        });
+        @* Here is the AJAX fetch method
+           With this, the page doesn't have to reload, 
+           because the modal is just pu to "Show"
+           It redirect towards the OrderData action
+           giving the orderId to find the order associated*@
+        fetch('/Employee/OrderData?orderId=' + trigger.dataset.orderid)
+            .then(r => r.text())
+            .then(html => { content.innerHTML = html; })
+            .catch(() => { content.innerHTML = '<div class="p-5 text-center text-danger">Erreur de chargement.</div>'; });
+    });
 
-        document.addEventListener('click', function(e) {
-            var container = document.getElementById('cashierModalContent');
-            if (!container || !container.contains(e.target)) return;
+    @* -- Manage the crates count input -- *@
+    @* JS is listening an input *@
+    document.addEventListener('input', function(e) {
+        var container = document.getElementById('cashierModalContent');
 
-            var title = document.getElementById('modal-dynamic-title-cashier');
+        @* If the container exists at that moment
+           and if the input id is "crates-returned" *@
+        if (container && e.target.id === 'crates-returned') {
+            var input = e.target;
 
-            if (e.target.closest('#btn-show-confirm')) {
-                e.preventDefault();
-                if(title) title.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-circle me-2"></i>Confirmation</span>';
-                container.querySelector('#summary-crates-returned').innerText = container.querySelector('#crates-returned').value || 0;
-                toggleCashierSteps(container, 'step-1', 'step-2');
+            @* Convert the input (string) in an integer *@
+            var val = parseInt(input.value);
+
+            @* If the value of the input is wrong 
+               like NaN or less than 0,
+               the input becomes empty *@
+            if (isNaN(val) || val < 0) {
+                val = 0;
+                input.value = "";
             }
 
-            if (e.target.closest('#btn-back-to-summary')) {
-                e.preventDefault();
-                if(title) title.innerHTML = '<span class="text-success"><i class="bi bi-cash-register me-2"></i>Encaissement</span>';
-                toggleCashierSteps(container, 'step-2', 'step-1');
-            }
-        });
+            @* Disable the confirm button if the value is an empty string *@
+            var btn = container.querySelector('#btn-show-confirm');
+            if(btn)
+                btn.disabled = input.value === "";
 
-        document.addEventListener('input', function(e) {
-            var container = document.getElementById('cashierModalContent');
-            if (container && e.target.id === 'crates-returned') {
-                var btn = container.querySelector('#btn-show-confirm');
-                if (btn) btn.disabled = e.target.value === "";
-            }
-        });
 
-        function toggleCashierSteps(container, hide, show) {
-            container.querySelector('#' + hide + '-body').classList.add('d-none');
-            container.querySelector('#' + hide + '-footer').classList.add('d-none');
-            container.querySelector('#' + show + '-body').classList.remove('d-none');
-            container.querySelector('#' + show + '-footer').classList.remove('d-none');
+            var finalTotalEl = container.querySelector('#dynamic-final-total');
+            var deductionEl = container.querySelector('#dynamic-deduction');
+            var deductionRow = container.querySelector('#deduction-row');
+            var cratesCountLabel = container.querySelector('#returned-crates-count');
+            var totalLabelEl = container.querySelector('#total-due-label');
+            var totalBlockEl = container.querySelector('#total-due-block');
+
+            if (finalTotalEl && deductionEl) {
+                var cratePrice = 5.95;
+                var deduction = val * cratePrice;
+
+                var baseTotal = parseFloat(finalTotalEl.dataset.basetotal.replace(',', '.'));
+                var newTotal = baseTotal - deduction;
+
+                if (cratesCountLabel) cratesCountLabel.innerText = val;
+                deductionEl.innerText = "- " + deduction.toFixed(2).replace('.', ',') + " €";
+
+                if (val > 0) {
+                    deductionRow.classList.remove('d-none');
+                } else {
+                    deductionRow.classList.add('d-none');
+                }
+
+                if (newTotal < 0) {
+                    var refundAmount = Math.abs(newTotal);
+                    finalTotalEl.innerText = refundAmount.toFixed(2).replace('.', ',') + " €";
+
+                    if (totalLabelEl) totalLabelEl.innerText = "Le magasin doit au client";
+
+                    if (totalBlockEl) {
+                        totalBlockEl.classList.remove('bg-success', 'bg-opacity-10', 'text-success');
+                        totalBlockEl.classList.add('bg-danger', 'bg-opacity-10', 'text-danger');
+                    }
+                    if (finalTotalEl) {
+                        finalTotalEl.classList.remove('text-success');
+                        finalTotalEl.classList.add('text-danger');
+                    }
+                    if (totalLabelEl) {
+                        totalLabelEl.classList.remove('text-success');
+                        totalLabelEl.classList.add('text-danger');
+                    }
+                } else {
+                    finalTotalEl.innerText = newTotal.toFixed(2).replace('.', ',') + " €";
+
+                    if (totalLabelEl) totalLabelEl.innerText = "Total à régler";
+
+                    if (totalBlockEl) {
+                        totalBlockEl.classList.remove('bg-danger', 'bg-opacity-10', 'text-danger');
+                        totalBlockEl.classList.add('bg-success', 'bg-opacity-10', 'text-success');
+                    }
+                    if (finalTotalEl) {
+                        finalTotalEl.classList.remove('text-danger');
+                        finalTotalEl.classList.add('text-success');
+                    }
+                    if (totalLabelEl) {
+                        totalLabelEl.classList.remove('text-danger');
+                        totalLabelEl.classList.add('text-success');
+                    }
+                }
+            }
         }
-    </script>
+    });
+
+    @* -- Show the confirmation window -- *@
+    document.addEventListener('click', function(e) {
+        var container = document.getElementById('cashierModalContent');
+
+        @* if the class "cashierModalContent" doesn't exist yet
+           or if the class is not concerned by the click,
+           JS get out of the method *@
+        if (!container || !container.contains(e.target))
+            return;
+
+        var title = document.getElementById('modal-dynamic-title-cashier');
+
+        @* If the emplacement clicked is well "#btn-show-confirm",
+           then you change the title content and display
+           the confirmation modal div *@
+        if (e.target.closest('#btn-show-confirm')) {
+            e.preventDefault();
+            if(title) title.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-circle me-2"></i>Confirmation</span>';
+            @* Set the crates returned input in the title modal div and if it's empty, then set 0 *@
+            container.querySelector('#bill-crates-returned').innerText = container.querySelector('#crates-returned').value || 0;
+            @* Use the function to hide step-1 but show step-2 *@
+            toggleCashierSteps(container, 'step-1', 'step-2');
+        }
+
+        @* If the order picker choose to return to the bill,
+           then you do the opposite by showing step-1 and hiding step-2 *@
+        if (e.target.closest('#btn-back-to-bill')) {
+            e.preventDefault();
+            if(title) title.innerHTML = '<span class="text-success"><i class="bi bi-cash-register me-2"></i>Encaissement</span>';
+            toggleCashierSteps(container, 'step-2', 'step-1');
+        }
+    });
+
+
+    function toggleCashierSteps(container, hide, show) {
+        container.querySelector('#' + hide + '-body').classList.add('d-none');
+        container.querySelector('#' + hide + '-footer').classList.add('d-none');
+        container.querySelector('#' + show + '-body').classList.remove('d-none');
+        container.querySelector('#' + show + '-footer').classList.remove('d-none');
+    }
+</script>
 }

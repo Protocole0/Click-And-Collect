@@ -35,6 +35,7 @@ namespace ClickAndCollect.Controllers
             return View("Cashier", orders);
         }
 
+        // UC View Order Details
         public async Task<IActionResult> OrderData(int orderId)
         {
             Order order = null;

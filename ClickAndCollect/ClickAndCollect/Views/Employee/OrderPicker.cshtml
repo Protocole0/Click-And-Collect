@@ -141,7 +141,7 @@
             if (e.target.closest('#btn-show-confirm') && !e.target.closest('#btn-show-confirm').disabled) {
                 e.preventDefault();
                 if(title) title.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-circle me-2"></i>Confirmation</span>';
-                container.querySelector('#summary-crates-count').innerText = container.querySelector('#crates-count').value;
+                container.querySelector('#bill-crates-count').innerText = container.querySelector('#crates-count').value;
                 toggleSteps(container, 'step-2', 'step-3');
             }
             if (e.target.closest('#btn-back-to-prep')) {
