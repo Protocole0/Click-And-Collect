@@ -21,7 +21,7 @@ namespace ClickAndCollect.Controllers
             _emailService = emailService;
         }
 
-        // GET: /Order/Checkout — page unique magasin + date + créneau + récap
+        // GET: /Order/Checkout — single page for store + date + time slot + order summary
         public async Task<IActionResult> Checkout()
         {
             if (!AccountController.IsLoggedIn(HttpContext.Session))
@@ -36,7 +36,7 @@ namespace ClickAndCollect.Controllers
         }
 
         // AJAX GET: /Order/GetDates?storeId=X
-        // Retourne les dates disponibles (à partir de demain, au moins 1 créneau libre)
+        // Returns available dates (from tomorrow, at least one free slot)
         public async Task<IActionResult> GetDates(int storeId)
         {
             if (!AccountController.IsLoggedIn(HttpContext.Session))
@@ -57,7 +57,7 @@ namespace ClickAndCollect.Controllers
         }
 
         // AJAX GET: /Order/GetTimeSlots?storeId=X&date=yyyy-MM-dd
-        // Retourne les créneaux disponibles (< 10 réservations) pour ce magasin et cette date
+        // Returns available slots (less than 10 reservations) for the given store and date
         public async Task<IActionResult> GetTimeSlots(int storeId, string date)
         {
             if (!AccountController.IsLoggedIn(HttpContext.Session))
@@ -94,22 +94,22 @@ namespace ClickAndCollect.Controllers
             string lastname  = HttpContext.Session.GetString(AccountController.SessionKeyLastname)!;
             string email     = HttpContext.Session.GetString(AccountController.SessionKeyEmail) ?? string.Empty;
 
-            // Construire le client via son constructeur
+            // Build the client from session data
             var client = new Client(clientId, firstname, lastname, string.Empty);
 
-            // Récupérer le magasin et le créneau pour les passer à la commande
+            // Fetch the store and the slot to pass them to the order
             Store?    store = await Store.GetById(storeId, _storeDAL);
             TimeSlot? slot  = await TimeSlot.GetById(timeSlotId, _timeSlotDAL);
 
             if (store == null || slot == null)
                 return RedirectToAction("Checkout");
 
-            // Construire chaque ligne via le constructeur OrderLine(Product, quantity)
+            // Build each order line using the OrderLine(Product, quantity) constructor
             var lines = cart.Lines
                 .Select(l => new OrderLine(l.Product, l.Quantity))
                 .ToList();
 
-            // Construire la commande complète via le constructeur dédié
+            // Build the full order using the dedicated constructor
             var order = new Order(
                 id:             0,
                 orderDate:      DateTime.Now,
@@ -121,14 +121,14 @@ namespace ClickAndCollect.Controllers
                 store:          store,
                 slot:           slot);
 
-            // Persister via la méthode d'instance
+            // Save the order using the instance method
             await order.PlaceOrder(_orderDAL);
 
-            // Envoyer l'email de confirmation
+            // Send the confirmation email
             if (!string.IsNullOrEmpty(email))
                 await _emailService.SendOrderConfirmationEmailAsync(email, firstname, lastname, order, order.Store!, order.Slot!);
 
-            // Vider le panier session
+            // Clear the session cart
             new Order().SaveToSession(HttpContext.Session);
 
             return RedirectToAction("Success");

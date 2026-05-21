@@ -32,8 +32,8 @@ namespace ClickAndCollect.DAL
             return null;
         }
 
-        // Retourne tous les créneaux futurs avec le nombre de réservations pour ce magasin.
-        // Le filtrage métier (< 10) est délégué à la classe TimeSlot.
+        // Returns all future slots with their reservation count for the given store.
+        // The business rule filtering (less than 10) is handled by the TimeSlot class.
         public async Task<List<TimeSlot>> GetFutureWithCountsAsync(int storeId)
         {
             List<TimeSlot> slots = new List<TimeSlot>();

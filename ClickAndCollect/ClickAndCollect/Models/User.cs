@@ -71,7 +71,7 @@ namespace ClickAndCollect.Models
         }
 
 
-        // --- Méthode statique : la classe délègue au DAL ---
+        // --- Static method : the class delegates to the DAL ---
 
         public static async Task<User?> Login(string email, string password, IUserDAL userDAL)
             => await userDAL.GetByEmailAndPasswordAsync(email, password);

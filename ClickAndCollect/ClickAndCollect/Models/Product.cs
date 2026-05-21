@@ -50,26 +50,26 @@ namespace ClickAndCollect.Models
             set { _nutritionalInfo = value; }
         }
 
-        // Source unique de vérité pour la catégorie
+        // Single source of truth for the category
         public Category? Category
         {
             get { return _category; }
             set { _category = value; }
         }
 
-        // Propriétés calculées depuis l'objet Category
+        // Computed properties from the Category object
         public int CategoryId   => _category?.CategoryId ?? 0;
 
         public string? CategoryName => _category?.Name;
 
-        // --- Constructeurs ---
+        // --- Constructors ---
 
         public Product() { _name = string.Empty; }
         
         // Constructor with the price only, for the cashier
         public Product(decimal price) { Price = price; }
 
-        // Constructeur utilisé par OrderDAL (nom + image + catégorie uniquement)
+        // Constructor used by OrderDAL (name + image + category only)
         public Product(string name, string? imageUrl, Category? category)
         {
             _name     = name;
@@ -77,7 +77,7 @@ namespace ClickAndCollect.Models
             _category = category;
         }
 
-        // Constructeur utilisé par CartController
+        // Constructor used by CartController
         public Product(int id, string name, decimal price, string? imageUrl)
         {
             _productId = id;
@@ -86,7 +86,7 @@ namespace ClickAndCollect.Models
             _imageUrl  = imageUrl;
         }
 
-        // Constructeur principal utilisé par ProductDAL
+        // Main constructor used by ProductDAL
         public Product(int productId, string name, string? description, decimal price,
                        string? imageUrl, string? nutritionalInfo, Category? category = null)
         {
@@ -99,7 +99,7 @@ namespace ClickAndCollect.Models
             _category        = category;
         }
 
-        // --- Méthodes statiques : la classe délègue au DAL ---
+        // --- Static methods : the class delegates to the DAL ---
 
         public static async Task<List<Product>> GetByCategoryId(int categoryId, IProductDAL productDal)
         {

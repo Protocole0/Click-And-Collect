@@ -72,14 +72,14 @@ namespace ClickAndCollect.Models
             PhoneNumber = phoneNumber;
         }
 
-        // --- Méthodes statiques : la classe délègue au DAL ---
+        // --- Static methods : the class delegates to the DAL ---
 
         public static async Task<bool> EmailExists(string email, IUserDAL userDAL)
         {
             return await userDAL.EmailExistsAsync(email);
         }
 
-        // --- Méthodes d'instance : l'objet Client communique avec le DAL ---
+        // --- Instance methods : the Client object communicates with the DAL ---
 
         public async Task CreateAccount(IUserDAL userDAL)
         {
