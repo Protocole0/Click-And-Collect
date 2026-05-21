@@ -141,7 +141,7 @@ namespace ClickAndCollect.Controllers
             };
         }
 
-        // Static helpers — utilisables depuis les vues via Context.Session
+        // Static helpers — usable from views via Context.Session
         public static bool IsLoggedIn(ISession session)
             => session.GetInt32(SessionKeyId).HasValue;
 

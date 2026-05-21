@@ -55,7 +55,7 @@ namespace ClickAndCollect.Models
             _products = new List<Product>();
         }
 
-        // --- Méthodes statiques : la classe Category délègue au DAL ---
+        // --- Static methods : the Category class delegates to the DAL ---
 
         public static async Task<List<Category>> GetAll(ICategoryDAL categoryDal)
         {
@@ -67,7 +67,7 @@ namespace ClickAndCollect.Models
             return await categoryDal.GetByIdAsync(categoryId);
         }
 
-        // --- Méthodes d'instance : l'objet Category gère sa liste de produits ---
+        // --- Instance methods : the Category object manages its product list ---
 
         public void AddProduct(Product product)
         {

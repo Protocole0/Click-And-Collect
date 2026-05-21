@@ -35,14 +35,14 @@ namespace ClickAndCollect.Models
 
         public OrderLine() { _product = new Product(); }
 
-        // Constructeur panier
+        // Cart constructor
         public OrderLine(Product product, int quantity)
         {
             _product = product;
             Quantity = quantity;
         }
 
-        // Constructeur commande BD
+        // Database order constructor
         public OrderLine(int id, int quantity, Product product)
         {
             _id      = id;

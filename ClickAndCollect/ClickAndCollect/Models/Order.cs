@@ -116,7 +116,7 @@ namespace ClickAndCollect.Models
             }
         }
 
-        // --- Constructeurs ---
+        // --- Constructors ---
 
         public Order()
         {
@@ -152,7 +152,7 @@ namespace ClickAndCollect.Models
             _lines = new List<OrderLine>();
         }
 
-        // Constructeur complet pour valider une commande client
+        // Full constructor to place a client order
         public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned,
                      OrderStatus status, Client client, List<OrderLine> lines,
                      Store store, TimeSlot slot)
@@ -168,7 +168,7 @@ namespace ClickAndCollect.Models
             _slot = slot;
         }
 
-        // --- Méthodes de calculs ---
+        // --- Calculation methods ---
 
         public int TotalItems()
         {
@@ -251,7 +251,7 @@ namespace ClickAndCollect.Models
             session.SetString("cart", JsonSerializer.Serialize(this));
         }
 
-        // --- Méthodes BD ---
+        // --- Database methods ---
 
         public static async Task<List<OrderDisplayViewModel>> GetAllOrdersAsync(IOrderDAL orderDAL, OrderStatus status, int? storeId, DateTime bookDate)
         {

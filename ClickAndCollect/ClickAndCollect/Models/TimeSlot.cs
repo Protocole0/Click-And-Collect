@@ -63,7 +63,7 @@ namespace ClickAndCollect.Models
             _endTime = endTime;
         }
 
-        // --- Méthodes statiques : la classe délègue au DAL ---
+        // --- Static methods : the class delegates to the DAL ---
 
         private const int MaxReservationsPerSlot = 10;
 
@@ -71,14 +71,14 @@ namespace ClickAndCollect.Models
 
         public int PlacesLeft => MaxReservationsPerSlot - Reservations;
 
-        // --- Méthodes statiques : la classe délègue au DAL puis applique les règles métier ---
+        // --- Static methods : the class delegates to the DAL then applies business rules ---
 
         public static async Task<TimeSlot?> GetById(int timeSlotId, ITimeSlotDAL timeSlotDAL)
         {
             return await timeSlotDAL.GetByIdAsync(timeSlotId);
         }
 
-        // Tous les créneaux disponibles d'un magasin (règle : < 10 réservations)
+        // All available slots for a store (rule: less than 10 reservations)
         public static async Task<List<TimeSlot>> GetAvailableAsync(int storeId, ITimeSlotDAL timeSlotDAL)
         {
             List<TimeSlot> all = await timeSlotDAL.GetFutureWithCountsAsync(storeId);
