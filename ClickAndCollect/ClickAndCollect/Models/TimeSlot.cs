@@ -24,9 +24,12 @@ namespace ClickAndCollect.Models
         }
 
         private TimeSpan _endTime;
-        public TimeSpan EndTime { 
-            get => _endTime; 
-            set => _endTime = value; 
+        public TimeSpan EndTime
+        {
+            get => _endTime;
+            set => _endTime = value > _startTime
+                ? value
+                : throw new ArgumentException("L'heure de fin doit être supérieure à l'heure de début.");
         }
 
         public int Reservations { get; set; }
@@ -38,7 +41,7 @@ namespace ClickAndCollect.Models
             _timeSlotId = timeSlotId;
             _dateSlot   = dateSlot;
             _startTime  = startTime;
-            _endTime    = endTime;
+            EndTime     = endTime;
         }
         
         public TimeSlot(DateTime dateSlot, TimeSpan startTime, TimeSpan endTime)

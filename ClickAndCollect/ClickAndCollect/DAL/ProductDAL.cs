@@ -41,19 +41,27 @@ namespace ClickAndCollect.DAL
 
                     while (await reader.ReadAsync())
                     {
-                        var category = new Category(
-                            reader.GetInt32(categoryIdOrd),
-                            reader.GetString(categoryNameOrd),
-                            null, null);
+                        try
+                        {
+                            var category = new Category(
+                                reader.GetInt32(categoryIdOrd),
+                                reader.GetString(categoryNameOrd),
+                                null, null);
 
-                        products.Add(new Product(
-                            reader.GetInt32(productIdOrd),
-                            reader.GetString(nameOrd),
-                            reader.IsDBNull(descOrd)        ? null : reader.GetString(descOrd),
-                            reader.GetDecimal(priceOrd),
-                            reader.IsDBNull(imageUrlOrd)    ? null : reader.GetString(imageUrlOrd),
-                            reader.IsDBNull(nutritionalOrd) ? null : reader.GetString(nutritionalOrd),
-                            category));
+                            products.Add(new Product(
+                                reader.GetInt32(productIdOrd),
+                                reader.GetString(nameOrd),
+                                reader.IsDBNull(descOrd)        ? null : reader.GetString(descOrd),
+                                reader.GetDecimal(priceOrd),
+                                reader.IsDBNull(imageUrlOrd)    ? null : reader.GetString(imageUrlOrd),
+                                reader.IsDBNull(nutritionalOrd) ? null : reader.GetString(nutritionalOrd),
+                                category));
+                        }
+                        catch (ArgumentOutOfRangeException ex)
+                        {
+                            throw new InvalidOperationException(
+                                $"Données invalides pour le produit id={reader.GetInt32(productIdOrd)} : {ex.Message}", ex);
+                        }
                     }
                 }
             }

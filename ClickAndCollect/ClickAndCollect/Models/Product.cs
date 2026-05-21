@@ -33,7 +33,9 @@ namespace ClickAndCollect.Models
         public decimal Price
         {
             get { return _price; }
-            set { _price = value; }
+            set { _price = value > 0
+                ? value
+                : throw new ArgumentOutOfRangeException(nameof(value), "Le prix doit être supérieur à 0."); }
         }
 
         public string? ImageUrl
@@ -65,7 +67,7 @@ namespace ClickAndCollect.Models
         public Product() { _name = string.Empty; }
         
         // Constructor with the price only, for the cashier
-        public Product(decimal price) { _price = price; }
+        public Product(decimal price) { Price = price; }
 
         // Constructeur utilisé par OrderDAL (nom + image + catégorie uniquement)
         public Product(string name, string? imageUrl, Category? category)
@@ -75,6 +77,15 @@ namespace ClickAndCollect.Models
             _category = category;
         }
 
+        // Constructeur utilisé par CartController
+        public Product(int id, string name, decimal price, string? imageUrl)
+        {
+            _productId = id;
+            _name      = name;
+            Price      = price;
+            _imageUrl  = imageUrl;
+        }
+
         // Constructeur principal utilisé par ProductDAL
         public Product(int productId, string name, string? description, decimal price,
                        string? imageUrl, string? nutritionalInfo, Category? category = null)
@@ -82,7 +93,7 @@ namespace ClickAndCollect.Models
             _productId       = productId;
             _name            = name;
             _description     = description;
-            _price           = price;
+            Price            = price;
             _imageUrl        = imageUrl;
             _nutritionalInfo = nutritionalInfo;
             _category        = category;

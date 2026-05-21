@@ -21,27 +21,30 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
+                @{
+                    bool    isLoggedIn = Context.Session.GetInt32("client_id").HasValue;
+                    string? userType   = Context.Session.GetString("user_type");
+                    string? fullname   = isLoggedIn
+                        ? $"{Context.Session.GetString("client_firstname")} {Context.Session.GetString("client_lastname")}"
+                        : null;
+                    bool isEmployee = userType == "cashier" || userType == "orderpicker";
+                }
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index">
-                            <i class="bi bi-house me-1"></i>Accueil
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Product" asp-action="Index">
-                            <i class="bi bi-grid me-1"></i>Nos produits
-                        </a>
-                    </li>
+                    @if (!isEmployee)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house me-1"></i>Accueil
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Product" asp-action="Index">
+                                <i class="bi bi-grid me-1"></i>Nos produits
+                            </a>
+                        </li>
+                    }
                 </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    @{
-                        bool    isLoggedIn = Context.Session.GetInt32("user_id").HasValue;
-                        string? userType   = Context.Session.GetString("user_type");
-                        string? fullname   = isLoggedIn
-                            ? $"{Context.Session.GetString("client_firstname")} {Context.Session.GetString("client_lastname")}"
-                            : null;
-                        bool isEmployee = userType == "cashier" || userType == "orderpicker";
-                    }
                     @if (isLoggedIn)
                     {
                         <li class="nav-item dropdown">
@@ -133,13 +136,16 @@
                         Commandez en ligne et récupérez vos courses directement en magasin.
                     </p>
                 </div>
-                <div class="col-md-4">
-                    <h6 class="fw-bold mb-2">Navigation</h6>
-                    <ul class="list-unstyled small">
-                        <li><a class="text-muted text-decoration-none" asp-controller="Home" asp-action="Index">Accueil</a></li>
-                        <li><a class="text-muted text-decoration-none" asp-controller="Product" asp-action="Index">Nos produits</a></li>
-                    </ul>
-                </div>
+                @if (!isEmployee)
+                {
+                    <div class="col-md-4">
+                        <h6 class="fw-bold mb-2">Navigation</h6>
+                        <ul class="list-unstyled small">
+                            <li><a class="text-muted text-decoration-none" asp-controller="Home" asp-action="Index">Accueil</a></li>
+                            <li><a class="text-muted text-decoration-none" asp-controller="Product" asp-action="Index">Nos produits</a></li>
+                        </ul>
+                    </div>
+                }
                 <div class="col-md-4">
                     <h6 class="fw-bold mb-2">Contact</h6>
                     <p class="text-muted small mb-0">

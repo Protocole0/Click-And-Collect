@@ -22,7 +22,7 @@ namespace ClickAndCollect.Controllers
             return View(categories);
         }
 
-        // UC-4 : Browse Product — charge la catégorie puis ses produits via LoadProductsAsync
+        // UC-4 : Browse Products — charge la catégorie puis ses produits
         public async Task<IActionResult> Browse(int id)
         {
             Category? category = await Category.GetById(id, _categoryDAL);
@@ -30,7 +30,6 @@ namespace ClickAndCollect.Controllers
                 return NotFound();
 
             await category.LoadProductsAsync(_productDAL);
-
             return View(category);
         }
 

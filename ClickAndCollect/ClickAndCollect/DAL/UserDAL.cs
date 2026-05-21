@@ -52,10 +52,17 @@ namespace ClickAndCollect.DAL
                 string phone = reader.IsDBNull(reader.GetOrdinal("phone_number"))
                                    ? string.Empty
                                    : reader.GetString(reader.GetOrdinal("phone_number"));
-
-                var client = new Client(clientId, firstname, lastname, phone);
-                client.Email = userEmail;
-                user = client;
+                try
+                {
+                    var client = new Client(clientId, firstname, lastname, phone);
+                    client.Email = userEmail;
+                    user = client;
+                }
+                catch (ArgumentException ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Données invalides pour le client id={clientId} : {ex.Message}", ex);
+                }
             }
             else
             {

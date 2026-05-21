@@ -60,13 +60,15 @@ namespace ClickAndCollect.Models
             Email = email;
         }
 
-        // Constructor without the password parameter
-        // To display non-sensible informations
-        // Like the name in the order dashboard
-        public Client(int id, string firstname, string lastname, string phoneNumber): base(id)
+        public Client(int id): base(id)
         {
-            Firstname = firstname;
-            Lastname = lastname;
+
+        }
+
+        public Client(int id, string firstname, string lastname, string phoneNumber) : base(id)
+        {
+            Firstname   = firstname;
+            Lastname    = lastname;
             PhoneNumber = phoneNumber;
         }
 
@@ -77,11 +79,16 @@ namespace ClickAndCollect.Models
             return await userDAL.EmailExistsAsync(email);
         }
 
-        // --- Méthode d'instance : l'objet Client communique avec le DAL ---
+        // --- Méthodes d'instance : l'objet Client communique avec le DAL ---
 
         public async Task CreateAccount(IUserDAL userDAL)
         {
             await userDAL.CreateAsync(this);
+        }
+
+        public async Task<List<Order>> GetOrdersAsync(IOrderDAL orderDAL)
+        {
+            return await orderDAL.GetOrdersByClientAsync(Id);
         }
     }
 }
