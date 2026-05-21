@@ -175,11 +175,17 @@ namespace ClickAndCollect.DAL
                 SELECT o.order_id, o.crates_used,
                        l.quantity,
                        p.price AS product_price,
-                       cl.first_name AS client_firstname, cl.last_name AS client_lastname
+                       cl.first_name AS client_firstname, cl.last_name AS client_lastname, 
+                       u.email AS client_email,
+                       s.name AS store_name, s.street_name AS store_street, s.street_number AS store_number, s.city AS store_city, s.postal_code AS store_postal_code,
+                       ts.date_slot, ts.start_time, ts.end_time
                 FROM dbo.Orders o
-                LEFT JOIN dbo.Order_line l  ON o.order_id    = l.order_id
-                LEFT JOIN dbo.Product p     ON l.product_id  = p.product_id
-                LEFT JOIN dbo.Client cl     ON o.client_id   = cl.client_id
+                LEFT JOIN dbo.Order_line l ON o.order_id = l.order_id
+                LEFT JOIN dbo.Product p ON l.product_id = p.product_id
+                LEFT JOIN dbo.Client cl ON o.client_id = cl.client_id
+                LEFT JOIN dbo.Users u ON cl.user_id = u.user_id
+                LEFT JOIN dbo.Store s ON o.store_id = s.store_id
+                LEFT JOIN dbo.Time_slot ts ON o.time_slot_id = ts.time_slot_id
                 WHERE o.order_id = @orderId";
 
             Order? order = null;
@@ -197,27 +203,28 @@ namespace ClickAndCollect.DAL
                     int productPriceOrd = reader.GetOrdinal("product_price");
                     int clientFirstnameOrd = reader.GetOrdinal("client_firstname");
                     int clientLastnameOrd = reader.GetOrdinal("client_lastname");
+                    int clientEmailOrd = reader.GetOrdinal("client_email");
+                    int storeNameOrd = reader.GetOrdinal("store_name");
+                    int storeStreetOrd = reader.GetOrdinal("store_street");
+                    int storeNumberOrd = reader.GetOrdinal("store_number");
+                    int storeCityOrd = reader.GetOrdinal("store_city");
+                    int storePostalCodeOrd = reader.GetOrdinal("store_postal_code");
+                    int dateSlotOrd = reader.GetOrdinal("date_slot");
+                    int startTimeOrd = reader.GetOrdinal("start_time");
+                    int endTimeOrd = reader.GetOrdinal("end_time");
 
                     while (await reader.ReadAsync())
                     {
                         try
                         {
-                            if (order == null)
-                            {
-                                order = new Order
-                                (
-                                    reader.GetInt32(orderIdOrd),
-                                    reader.GetInt32(cratesUsedOrd),
-                                    new Client(reader.GetString(clientFirstnameOrd), reader.GetString(clientLastnameOrd))
-                                );
-                            }
-
-                            order.Lines.Add(new OrderLine(new Product(reader.GetDecimal(productPriceOrd)), reader.GetInt32(quantityOrd)));
-                        }
-                        catch (ArgumentException ex)
-                        {
-                            throw new InvalidOperationException(
-                                $"Données invalides pour la commande id={reader.GetInt32(orderIdOrd)} : {ex.Message}", ex);
+                            order = new Order
+                            (
+                                reader.GetInt32(orderIdOrd),
+                                reader.GetInt32(cratesUsedOrd),
+                                new Client(reader.GetString(clientFirstnameOrd), reader.GetString(clientLastnameOrd), reader.GetString(clientEmailOrd)),
+                                new Store(reader.GetString(storeNameOrd), reader.GetString(storeStreetOrd), reader.GetString(storeNumberOrd), reader.GetString(storeCityOrd), reader.GetString(storePostalCodeOrd)),
+                                new TimeSlot(reader.GetDateTime(dateSlotOrd), reader.GetTimeSpan(startTimeOrd), reader.GetTimeSpan(endTimeOrd))
+                            );
                         }
                     }
                 }
@@ -334,7 +341,7 @@ namespace ClickAndCollect.DAL
 
             return dict.Values.ToList();
         }
-
+       
         public async Task CreateAsync(Order order)
         {
             using SqlConnection conn = new SqlConnection(_connectionString);

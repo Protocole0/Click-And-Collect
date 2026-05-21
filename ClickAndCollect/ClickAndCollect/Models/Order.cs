@@ -1,5 +1,4 @@
 using ClickAndCollect.Interfaces;
-using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 using ClickAndCollect.ViewModels;
 
@@ -17,57 +16,103 @@ namespace ClickAndCollect.Models
     {
         public static decimal DefaultServiceFee = 5.95m;
 
-        // --- Liste des lignes (panier session ET commande BD) ---
-        private List<OrderLine> _lines;
-        public List<OrderLine> Lines
-        {
-            get => _lines;
-            set { _lines = value; }
-        }
-
-        // --- Champs commande BD ---
-
         private int _id;
         public int Id { 
-            get => _id; 
-            set => _id = value;
+            get => _id;
+            init
+            {
+                if (value < 0)
+                    throw new ArgumentException("L'id d'une commande ne peut être négatif");
+                _id = value;
+            }
         }
 
         private DateTime _orderDate;
         public DateTime OrderDate { 
             get => _orderDate; 
-            set => _orderDate = value;
+            set
+            {
+                if (value.Date > DateTime.Today)
+                    throw new ArgumentException("La date où le client a passé commande ne peut être dans le futur.");
+            }
         }
 
         private int _cratesUsed;
         public int CratesUsed { 
             get => _cratesUsed; 
-            set => _cratesUsed = value; 
+            set
+            {
+                if (CratesUsed < 0)
+                    throw new Exception("Le nombre de caisses utilisées ne peut être inférieure à 0.");
+                _cratesUsed = value; 
+            }
         }
 
         private int _cratesReturned;
         public int CratesReturned { 
-            get => _cratesReturned; 
-            set => _cratesReturned = value; 
+            get => _cratesReturned;
+            set
+            {
+                if (CratesReturned < 0)
+                    throw new Exception("Le nombre de caisses rendues ne peut être négatif.");
+                _cratesReturned = value;
+            }
         }
 
         private OrderStatus _status;
         public OrderStatus Status { 
-            get => _status; 
-            set => _status = value; 
+            get => _status;
+            set
+            {
+                // If the value is not included in the possible values of the Enum
+                if (!Enum.IsDefined(typeof(OrderStatus), value))
+                {
+                    throw new ArgumentException("Le statut de commande fourni n'existe pas ou est invalide.");
+                }
+                _status = value;
+            }
+        }
+
+        // -- Objects linked as Order properties
+
+        // List of the ordelines for each product
+        private List<OrderLine> _lines;
+        public List<OrderLine> Lines
+        {
+            get => _lines;
+            set 
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                _lines = value; 
+            }
         }
 
         private Client? _client;
         public Client? Client {
             get => _client;
-            set => _client = value;
+            set
+            {
+                _client = value;
+            }
         }
 
         private Store? _store;
-        public Store? Store { get => _store; set => _store = value; }
+        public Store? Store {
+            get => _store;
+            set
+            {
+                _store = value;
+            }
+        }
 
         private TimeSlot? _slot;
-        public TimeSlot? Slot { get => _slot; set => _slot = value; }
+        public TimeSlot? Slot { 
+            get => _slot; 
+            set
+            {
+                _slot = value;
+            }
+        }
 
         // --- Constructeurs ---
 
@@ -84,14 +129,24 @@ namespace ClickAndCollect.Models
             Client = client;
             _lines = new List<OrderLine>();
         }
-        
-        // Constructors for the GetOrderForBill method
-        // in the OrderDAL for the cashier data
+
         public Order(int orderId, int cratesUsed, Client client)
         {
             Id = orderId;
             CratesUsed = cratesUsed;
             Client = client;
+            _lines = new List<OrderLine>();
+        }
+
+        // Constructors for the GetOrderForBill method
+        // in the OrderDAL for the cashier data
+        public Order(int orderId, int cratesUsed, Client client, Store store, TimeSlot slot)
+        {
+            Id = orderId;
+            CratesUsed = cratesUsed;
+            Client = client;
+            Store = store;
+            Slot = slot;
             _lines = new List<OrderLine>();
         }
 
@@ -111,39 +166,11 @@ namespace ClickAndCollect.Models
             _slot           = slot;
         }
 
-        public Order(int id, DateTime orderDate, int cratesUsed, int cratesReturned, OrderStatus status, Client client)
-        {
-            _id             = id;
-            _orderDate      = orderDate;
-            _cratesUsed     = cratesUsed;
-            _cratesReturned = cratesReturned;
-            _status         = status;
-            _client         = client;
-            _lines          = new List<OrderLine>();
-        }
-
-        public decimal GetHTTotalPrice()
-        {
-            // Using of lambda expression in the LINQ Sum method
-            // to calculate total price of an order without
-            // including the crate fee and the service fee
-            return Lines.Sum(l => l.Quantity * l.Product.Price);
-        }
-
-        public decimal GetTTCTotalPrice()
-        {
-            // Calculate total price of an order including
-            // the price of products (GetHTTotalPrice), the crate fee and the service fee
-            decimal serviceFee = DefaultServiceFee;
-            decimal hTPrice = GetHTTotalPrice();
-
-            return hTPrice + (CratesUsed * 5.95m) + serviceFee;
-        }
-
-        // --- Méthodes panier (session) ---
+        // --- Méthodes de calculs ---
 
         public int TotalItems()
         {
+            // Calculate the actual item quantity of the order
             int total = 0;
             foreach (OrderLine line in _lines)
                 total += line.Quantity;
@@ -153,6 +180,8 @@ namespace ClickAndCollect.Models
 
         public decimal TotalAmount()
         {
+            // Calculate total price of an order without
+            // including the crate fee and the service fee
             decimal total = 0;
             foreach (OrderLine line in _lines)
                 total += line.GetSubTotal();
@@ -160,9 +189,15 @@ namespace ClickAndCollect.Models
         }
 
         public decimal TotalWithServiceFee()
-        {
-            return TotalAmount() + DefaultServiceFee;
-        }
+            // Calculate total price of an order including
+            // the price of products and the service fee
+            => TotalAmount() + DefaultServiceFee;
+
+        public decimal TTCTotalAmount()
+            // Calculate total price of an order including
+            // the price of products (GetHTTotalPrice), the crate fee and the service fee
+            => TotalWithServiceFee() + (CratesUsed * 5.95m);
+        
 
         public void AddProduct(Product product, int quantity)
         {
@@ -236,18 +271,23 @@ namespace ClickAndCollect.Models
             await orderDAL.CreateAsync(this);
         }
 
-        public async Task<bool> UpdateCratesUsed(IOrderDAL orderDAL, int orderId, int cratesCount, int checkedProductsCount)
+        public async Task<bool> UpdateCratesUsed(IOrderDAL orderDAL, int cratesUsed, int checkedProductsCount)
         {
-            if(Lines.Count() == checkedProductsCount && cratesCount > 0)
+            CratesUsed = cratesUsed;
+            if (CratesUsed < 1)
+                throw new Exception("Le nombre de caisses utilisées ne peut être inférieure à un. Pour la préparation d'une commande, vous avez besoin d'au moins une caisse.");
+            // If all the products have been checked
+            if(Lines.Count() == checkedProductsCount)
             {
-                return await orderDAL.UpdateCratesUsed(orderId, cratesCount);
+                return await orderDAL.UpdateCratesUsed(Id, CratesUsed);
             }
             return false;
         }
         
-        public async Task<bool> UpdateCratesReturned(IOrderDAL orderDAL, int orderId, int cratesCount)
+        public async Task<bool> UpdateCratesReturned(IOrderDAL orderDAL, int cratesReturned)
         {
-            return await orderDAL.UpdateCratesReturned(orderId, cratesCount);
+            CratesReturned = cratesReturned;
+            return await orderDAL.UpdateCratesReturned(Id, CratesReturned);
         }
     }
 }

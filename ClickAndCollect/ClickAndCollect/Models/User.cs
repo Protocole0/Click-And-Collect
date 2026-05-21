@@ -6,24 +6,31 @@ namespace ClickAndCollect.Models
     abstract public class User
     {
         private int _id;
-
         public int Id
         {
-            get { return _id; }
-            set { _id = value; }
+            get => _id;
+            init
+            {
+                if (value < 0)
+                    throw new ArgumentException("L'id d'un utilisateur ne peut être négatif");
+                _id = value;
+            }
         }
 
         private string _email;
-
         [DataType(DataType.EmailAddress)]
         public string Email
         {
             get { return _email; }
-            set { _email = value; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("L'email du client ne peut être vide.");
+                _email = value;
+            }
         }
 
         private string _password;
-
         [DataType(DataType.Password)]
         [StringLength(20, MinimumLength = 12, ErrorMessage = "Le mot de passe doit faire entre 12 et 20 caractères.")]
         public string Password
@@ -38,6 +45,16 @@ namespace ClickAndCollect.Models
         {
 
         }
+        public User(int id)
+        {
+            Id = id;
+        }
+
+        public User(int id, string email)
+        {
+            Id = id;
+            Email = email;
+        }
 
         public User(int id, string email, string password)
         {
@@ -46,10 +63,13 @@ namespace ClickAndCollect.Models
             Password = password;
         }
 
-        public User(int id)
+        public User(string? user_type, int? id, string? email)
         {
-            Id = id;
+            UserType = user_type ?? string.Empty;
+            Id = id ?? 0;
+            Email = email ?? string.Empty;
         }
+
 
         // --- Méthode statique : la classe délègue au DAL ---
 

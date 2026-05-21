@@ -40,16 +40,16 @@ namespace ClickAndCollect.DAL
 
             string userType = reader.GetString(reader.GetOrdinal("user_type"));
             string userEmail = reader.GetString(reader.GetOrdinal("email"));
-            int    userId   = reader.GetInt32(reader.GetOrdinal("user_id"));
+            int userId = reader.GetInt32(reader.GetOrdinal("user_id"));
 
             User user;
 
             if (userType == "client")
             {
-                int    clientId  = reader.GetInt32(reader.GetOrdinal("client_id"));
+                int clientId = reader.GetInt32(reader.GetOrdinal("client_id"));
                 string firstname = reader.GetString(reader.GetOrdinal("first_name"));
-                string lastname  = reader.GetString(reader.GetOrdinal("last_name"));
-                string phone     = reader.IsDBNull(reader.GetOrdinal("phone_number"))
+                string lastname = reader.GetString(reader.GetOrdinal("last_name"));
+                string phone = reader.IsDBNull(reader.GetOrdinal("phone_number"))
                                    ? string.Empty
                                    : reader.GetString(reader.GetOrdinal("phone_number"));
                 try

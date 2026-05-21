@@ -11,11 +11,11 @@ namespace ClickAndCollect.Controllers
         private readonly IUserDAL     _userDAL;
         private readonly IEmailService _emailService;
 
-        public const string SessionKeyId        = "client_id";
+        public const string SessionKeyId        = "user_id";
         public const string SessionKeyFirstname = "client_firstname";
         public const string SessionKeyLastname  = "client_lastname";
         public const string SessionKeyUserType  = "user_type";
-        public const string SessionKeyEmail     = "client_email";
+        public const string SessionKeyEmail     = "user_email";
         public const string SessionKeyStoreId   = "store_id";
 
         public AccountController(IUserDAL userDAL, IEmailService emailService)
@@ -136,7 +136,7 @@ namespace ClickAndCollect.Controllers
         {
             return GetUserType(session) switch
             {
-                "client"      => RedirectToAction("Index",   "Home"),
+                "client" => RedirectToAction("Index", "Home"),
                 _ => RedirectToAction("Dashboard", "Employee")
             };
         }

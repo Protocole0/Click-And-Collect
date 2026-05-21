@@ -48,6 +48,20 @@ namespace ClickAndCollect.Models
 
         public Store() { _name = _streetName = _streetNumber = _city = _postalCode = string.Empty; }
 
+        public Store(int? storeId)
+        {
+            _storeId = storeId ?? 0;
+        }
+
+        public Store(string name, string streetName, string streetNumber, string city, string postalCode)
+        {
+            _name         = name;
+            _streetName   = streetName;
+            _streetNumber = streetNumber;
+            _city         = city;
+            _postalCode   = postalCode;
+        }
+        
         public Store(int storeId, string name, string streetName, string streetNumber, string city, string postalCode)
         {
             _storeId      = storeId;

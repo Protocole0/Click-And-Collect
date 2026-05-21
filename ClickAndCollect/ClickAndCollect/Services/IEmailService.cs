@@ -6,5 +6,6 @@ namespace ClickAndCollect.Services
     {
         Task SendWelcomeEmailAsync(string toEmail, string firstname, string lastname, string email);
         Task SendOrderConfirmationEmailAsync(string toEmail, string firstname, string lastname, Order order, Store store, TimeSlot slot);
+        Task SendOrderFinalBillAsync(Order order);
     }
 }
