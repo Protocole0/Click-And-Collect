@@ -100,7 +100,7 @@
                 <div class="w-100" id="cashierModalHeader"></div>
                 <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
-            <div id="cashierModalContent"></div>
+            <div id="cashierModalContent" data-crate-price=@Order.DefaultServiceFee></div>
         </div>
     </div>
 </div>
@@ -169,16 +169,17 @@
             if(btn)
                 btn.disabled = input.value === "";
 
-
-            var finalTotalEl = container.querySelector('#dynamic-final-total');
-            var deductionEl = container.querySelector('#dynamic-deduction');
+            @* Retrieve all the elements linked 
+               to the dynamic total changes *@
             var deductionRow = container.querySelector('#deduction-row');
             var cratesCountLabel = container.querySelector('#returned-crates-count');
+            var deductionEl = container.querySelector('#dynamic-deduction');
             var totalLabelEl = container.querySelector('#total-due-label');
             var totalBlockEl = container.querySelector('#total-due-block');
+            var finalTotalEl = container.querySelector('#dynamic-final-total');
 
             if (finalTotalEl && deductionEl) {
-                var cratePrice = 5.95;
+                var cratePrice = parseFloat(container.dataset.cratePrice) || 5.95;
                 var deduction = val * cratePrice;
 
                 var baseTotal = parseFloat(finalTotalEl.dataset.basetotal.replace(',', '.'));

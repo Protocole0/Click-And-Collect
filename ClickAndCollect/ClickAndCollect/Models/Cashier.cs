@@ -12,7 +12,7 @@ namespace ClickAndCollect.Models
         {
             _store = store;
         }
-        
+
         public Cashier(string? user_type, int? id, string? email, Store store) : base(user_type, id, email)
         {
             UserType = user_type ?? string.Empty;

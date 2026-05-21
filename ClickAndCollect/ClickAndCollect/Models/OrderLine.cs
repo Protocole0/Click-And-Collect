@@ -5,7 +5,12 @@ namespace ClickAndCollect.Models
         private int _id;
         public int Id { 
             get => _id; 
-            set => _id = value; 
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("L'id d'une ligne de commande ne peut être négatif");
+                _id = value;
+            }
         }
 
         private Product _product;
@@ -21,13 +26,6 @@ namespace ClickAndCollect.Models
             set => _quantity = value > 0
                 ? value
                 : throw new ArgumentOutOfRangeException(nameof(value), "La quantité doit être supérieure à 0.");
-        }
-
-        private bool _checkbox;
-        public bool Checkbox
-        {
-            get => _checkbox;
-            set => _checkbox = value;
         }
 
         public decimal GetSubTotal()

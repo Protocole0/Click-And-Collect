@@ -89,9 +89,9 @@ namespace ClickAndCollect.Services
                                   """);
             }
 
-            string total       = order.TotalAmount().ToString("0.00", CultureInfo.InvariantCulture);
-            string serviceFee  = Order.DefaultServiceFee.ToString("0.00", CultureInfo.InvariantCulture);
-            string grandTotal  = (order.TotalAmount() + Order.DefaultServiceFee).ToString("0.00", CultureInfo.InvariantCulture);
+            string total = order.TotalAmount().ToString("0.00", CultureInfo.InvariantCulture);
+            string serviceFee = Order.DefaultServiceFee.ToString("0.00", CultureInfo.InvariantCulture);
+            string grandTotal = (order.TotalAmount() + Order.DefaultServiceFee).ToString("0.00", CultureInfo.InvariantCulture);
 
             return $"""
             <!DOCTYPE html>

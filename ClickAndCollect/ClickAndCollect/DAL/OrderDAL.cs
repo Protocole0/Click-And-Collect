@@ -132,7 +132,7 @@ namespace ClickAndCollect.DAL
                     int productImageOrd = reader.GetOrdinal("product_image");
                     int categoryNameOrd = reader.GetOrdinal("category_name");
                     int clientFirstnameOrd = reader.GetOrdinal("client_firstname");
-                    int clientLastnameOrd  = reader.GetOrdinal("client_lastname");
+                    int clientLastnameOrd = reader.GetOrdinal("client_lastname");
 
                     while (await reader.ReadAsync())
                     {
@@ -149,7 +149,7 @@ namespace ClickAndCollect.DAL
 
                             Product p = new Product
                             {
-                                Name     = reader.GetString(productNameOrd),
+                                Name = reader.GetString(productNameOrd),
                                 ImageUrl = reader.GetString(productImageOrd),
                                 Category = new Category(reader.GetString(categoryNameOrd))
                             };
@@ -346,7 +346,7 @@ namespace ClickAndCollect.DAL
 
             return dict.Values.ToList();
         }
-       
+
         public async Task CreateAsync(Order order)
         {
             using SqlConnection conn = new SqlConnection(_connectionString);
@@ -407,7 +407,7 @@ namespace ClickAndCollect.DAL
             int res = await cmd.ExecuteNonQueryAsync();
             return res > 0;
         }
-       
+
         public async Task<bool> UpdateCratesReturned(int orderId, int cratesCount)
         {
             string query = @"

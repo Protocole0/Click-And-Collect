@@ -180,12 +180,20 @@
 
             var bar = container.querySelector('#prep-progress-bar');
             var counter = container.querySelector('#prep-counter');
+            var percentLabel = container.querySelector('#prep-percent');
             var btn = container.querySelector('#btn-show-confirm');
             var crates = container.querySelector('#crates-count');
 
             if (bar) bar.style.width = percent + '%';
             if (counter) counter.innerText = checked + " / " + all;
-            if (btn && crates) btn.disabled = !(percent === 100 && crates.value > 0);
+            if (percentLabel) percentLabel.innerText = percent + '%';
+
+            if (btn) 
+            {
+                crates.value = crates && (!isNaN(crates.value) || parseInt(crates.value) > 0) ? parseInt(crates.value) || "" : "";
+                var cratesVal = crates.value;
+                btn.disabled = !(percent === 100 && cratesVal > 0);
+            }
         }
     </script>
 }
