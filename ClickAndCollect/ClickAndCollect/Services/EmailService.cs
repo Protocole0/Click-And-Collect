@@ -333,5 +333,165 @@ namespace ClickAndCollect.Services
             </html>
             """;
         }
+
+        public async Task SendOrderFinalBillAsync(Order order)
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(
+                _config["Smtp:FromName"],
+                _config["Smtp:FromEmail"]));
+            message.To.Add(new MailboxAddress($"{order.Client!.Firstname} {order.Client.Lastname}", order.Client.Email));
+            message.Subject = $"Votre facture Click & Collect (Commande n°{order.Id})";
+
+            var builder = new BodyBuilder
+            {
+                HtmlBody = BuildFinalBillHtml(order)
+            };
+            message.Body = builder.ToMessageBody();
+
+            using var client = new SmtpClient();
+            await client.ConnectAsync(
+                _config["Smtp:Host"],
+                int.Parse(_config["Smtp:Port"]!),
+                SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(
+                _config["Smtp:Username"],
+                _config["Smtp:Password"]);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
+        }
+
+        private static string BuildFinalBillHtml(Order order)
+        {
+            var cultureInfo = new CultureInfo("fr-FR");
+            string todayDate = DateTime.Now.ToString("dddd d MMMM yyyy à HH:mm", cultureInfo);
+
+            // Construction des lignes du panier
+            var linesHtml = new StringBuilder();
+            foreach (var line in order.Lines)
+            {
+                string subtotal = line.GetSubTotal().ToString("0.00", CultureInfo.InvariantCulture);
+                linesHtml.Append($"""
+            <tr>
+                <td style="padding:10px 0;border-bottom:1px solid #e9ecef;color:#212529;font-size:14px;">{line.Product.Name}</td>
+                <td style="padding:10px 0;border-bottom:1px solid #e9ecef;color:#6c757d;font-size:14px;text-align:center;">{line.Quantity}</td>
+                <td style="padding:10px 0;border-bottom:1px solid #e9ecef;color:#212529;font-size:14px;text-align:right;font-weight:bold;">{subtotal} €</td>
+            </tr>
+            """);
+            }
+
+            // Calculs de la facture
+            decimal subTotal = order.TotalAmount();
+            decimal serviceFee = Order.DefaultServiceFee;
+            decimal cratesUsedCost = order.CratesUsed * 5.95m;
+            decimal cratesReturnedRefund = order.CratesReturned * 5.95m;
+
+            // Le total réellement payé par le client à la caisse
+            decimal finalPaid = subTotal + serviceFee + cratesUsedCost - cratesReturnedRefund;
+
+            return $"""
+                <!DOCTYPE html>
+                <html lang="fr">
+                <head>
+                  <meta charset="UTF-8" />
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                  <title>Facture Click & Collect</title>
+                </head>
+                <body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,sans-serif;">
+
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:30px 0;">
+                    <tr>
+                      <td align="center">
+                        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+                          <tr>
+                            <td style="background-color:#0d6efd;padding:36px 40px;text-align:center;">
+                              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:bold;letter-spacing:1px;">
+                                🧾 Reçu de commande
+                              </h1>
+                              <p style="margin:8px 0 0;color:#cfe2ff;font-size:14px;">
+                                Commande n°{order.Id} retirée le {todayDate}
+                              </p>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td style="padding:36px 40px;">
+
+                              <h2 style="margin:0 0 16px;color:#212529;font-size:20px;">
+                                Merci de votre visite, {order.Client!.Firstname} !
+                              </h2>
+                              <p style="margin:0 0 28px;color:#495057;font-size:15px;line-height:1.6;">
+                                Votre commande a bien été retirée dans votre magasin <strong>{order.Store?.Name ?? "Carrefour"}</strong>. Voici le détail de votre facturation finale, incluant la gestion de vos caisses consignées.
+                              </p>
+
+                              <p style="margin:0 0 12px;color:#6c757d;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;font-weight:bold;">
+                                Articles achetés
+                              </p>
+                              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
+                                <thead>
+                                  <tr>
+                                    <th style="padding:8px 0;color:#6c757d;font-size:12px;text-align:left;font-weight:normal;border-bottom:2px solid #dee2e6;">Article</th>
+                                    <th style="padding:8px 0;color:#6c757d;font-size:12px;text-align:center;font-weight:normal;border-bottom:2px solid #dee2e6;">Qté</th>
+                                    <th style="padding:8px 0;color:#6c757d;font-size:12px;text-align:right;font-weight:normal;border-bottom:2px solid #dee2e6;">Sous-total</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {linesHtml}
+                                </tbody>
+                              </table>
+
+                              <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;margin-bottom:32px;background-color:#f8f9fa;border:1px solid #e9ecef;border-radius:6px;">
+                                <tr>
+                                  <td style="padding:12px 24px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0">
+                                      <tr>
+                                        <td style="padding:6px 0;color:#495057;font-size:14px;">Produits</td>
+                                        <td style="padding:6px 0;color:#212529;font-size:14px;text-align:right;">{subTotal.ToString("0.00", CultureInfo.InvariantCulture)} €</td>
+                                      </tr>
+                                      <tr>
+                                        <td style="padding:6px 0;color:#495057;font-size:14px;">Frais de préparation</td>
+                                        <td style="padding:6px 0;color:#212529;font-size:14px;text-align:right;">{serviceFee.ToString("0.00", CultureInfo.InvariantCulture)} €</td>
+                                      </tr>
+                                      <tr style="border-top:1px solid #dee2e6;">
+                                        <td style="padding:6px 0;color:#495057;font-size:14px;">Consigne ({order.CratesUsed} caisses à emporter)</td>
+                                        <td style="padding:6px 0;color:#212529;font-size:14px;text-align:right;">+ {cratesUsedCost.ToString("0.00", CultureInfo.InvariantCulture)} €</td>
+                                      </tr>
+                                      <tr>
+                                        <td style="padding:6px 0;color:#198754;font-size:14px;">Déconsigne ({order.CratesReturned} caisses rendues)</td>
+                                        <td style="padding:6px 0;color:#198754;font-size:14px;text-align:right;">- {cratesReturnedRefund.ToString("0.00", CultureInfo.InvariantCulture)} €</td>
+                                      </tr>
+                                      <tr>
+                                        <td style="padding:16px 0 4px;color:#212529;font-size:16px;font-weight:bold;border-top:2px solid #dee2e6;">TOTAL RÉGLÉ</td>
+                                        <td style="padding:16px 0 4px;color:#0d6efd;font-size:20px;font-weight:bold;text-align:right;border-top:2px solid #dee2e6;">{finalPaid.ToString("0.00", CultureInfo.InvariantCulture)} €</td>
+                                      </tr>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </table>
+
+                              <p style="margin:0;color:#6c757d;font-size:13px;line-height:1.6;text-align:center;">
+                                Nous espérons vous revoir très bientôt dans nos rayons !
+                              </p>
+
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td style="background-color:#212529;padding:28px 40px;text-align:center;">
+                              <p style="margin:0 0 8px;color:#adb5bd;font-size:13px;">Click &amp; Collect — Haute École Condorcet</p>
+                              <p style="margin:0;color:#6c757d;font-size:12px;">✉️ contact@clickcollect.be</p>
+                            </td>
+                          </tr>
+
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+
+                </body>
+                </html>
+                """;
+        }
     }
 }

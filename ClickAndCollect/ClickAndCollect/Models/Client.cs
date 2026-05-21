@@ -1,19 +1,42 @@
+using ClickAndCollect.DAL;
 using ClickAndCollect.Interfaces;
+using ClickAndCollect.ViewModels;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace ClickAndCollect.Models
 {
     public class Client : User
     {
-        public string Firstname { get; set; }
-
-        public string Lastname { get; set; }
-
-        public string PhoneNumber { get; set; }
-
-        public Client()
+        private string _firstname;
+        public string Firstname
         {
+            get => _firstname;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Le prénom du client ne peut être vide.");
+                _firstname = value.Trim();
+            }
+        }
 
+        private string _lastname;
+        public string Lastname
+        {
+            get => _lastname;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Le nom de famille du client ne peut être vide.");
+                _lastname = value.Trim();
+            }
+        }
+
+        private string _phoneNumber;
+        public string PhoneNumber
+        {
+            get => _phoneNumber;
+            set => _phoneNumber = value;
         }
 
         public Client(int id, string firstname, string lastname, string email, string password, string phoneNumber): base(id, email, password)
@@ -28,6 +51,13 @@ namespace ClickAndCollect.Models
         {
             Firstname = firstname;
             Lastname = lastname;
+        }
+        
+        public Client(string firstname, string lastname, string email)
+        {
+            Firstname = firstname;
+            Lastname = lastname;
+            Email = email;
         }
 
         // Constructor without the password parameter

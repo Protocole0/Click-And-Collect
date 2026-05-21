@@ -1,6 +1,7 @@
-using System.Diagnostics;
 using ClickAndCollect.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace ClickAndCollect.Controllers
 {
@@ -24,9 +25,28 @@ namespace ClickAndCollect.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(int? statusCode = null)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            if (statusCode == 404)
+            {
+                string referer = Request.Headers["Referer"].ToString();
+
+                if (!string.IsNullOrEmpty(referer))
+                {
+                    return Redirect(referer);
+                }
+
+                if (HttpContext.Session.GetInt32("user_id").HasValue)
+                {
+                    if (HttpContext.Session.GetString("user_type") == "client")
+                        return RedirectToAction("Index");
+                    return RedirectToAction("Dashboard", "Employee");
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View("Error");
         }
     }
 }

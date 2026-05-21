@@ -40,6 +40,13 @@ namespace ClickAndCollect.Models
             _startTime  = startTime;
             _endTime    = endTime;
         }
+        
+        public TimeSlot(DateTime dateSlot, TimeSpan startTime, TimeSpan endTime)
+        {
+            _dateSlot   = dateSlot;
+            _startTime  = startTime;
+            _endTime    = endTime;
+        }
 
         // --- Méthodes statiques : la classe délègue au DAL ---
 
