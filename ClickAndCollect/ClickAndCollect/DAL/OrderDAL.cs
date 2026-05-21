@@ -215,7 +215,7 @@ namespace ClickAndCollect.DAL
 
                     while (await reader.ReadAsync())
                     {
-                        try
+                        if (order == null)
                         {
                             order = new Order
                             (
@@ -226,6 +226,11 @@ namespace ClickAndCollect.DAL
                                 new TimeSlot(reader.GetDateTime(dateSlotOrd), reader.GetTimeSpan(startTimeOrd), reader.GetTimeSpan(endTimeOrd))
                             );
                         }
+
+                        // The Product object calls the constructor
+                        // with the price only, because for the bill,
+                        // only the price is needed
+                        order.Lines.Add(new OrderLine(new Product(reader.GetDecimal(productPriceOrd)), reader.GetInt32(quantityOrd)));
                     }
                 }
             }

@@ -22,11 +22,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
                 @{
-                    bool    isLoggedIn = Context.Session.GetInt32("client_id").HasValue;
-                    string? userType   = Context.Session.GetString("user_type");
-                    string? fullname   = isLoggedIn
-                        ? $"{Context.Session.GetString("client_firstname")} {Context.Session.GetString("client_lastname")}"
-                        : null;
+                    bool isLoggedIn = Context.Session.GetInt32("user_id").HasValue;
+                    string? userType = Context.Session.GetString("user_type");
+                    string? fullname = isLoggedIn
+                    ? $"{Context.Session.GetString("client_firstname")} {Context.Session.GetString("client_lastname")}"
+                    : null;
                     bool isEmployee = userType == "cashier" || userType == "orderpicker";
                 }
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
