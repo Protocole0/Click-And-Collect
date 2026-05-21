@@ -64,7 +64,14 @@ namespace ClickAndCollect.Controllers
                     TempData["ErrorMessage"] = e.Message;
                 }
             }
-            order = await Order.GetOrderForBillAsync(_orderDAL, orderId);
+            try
+            {
+                order = await Order.GetOrderForBillAsync(_orderDAL, orderId);
+            }
+            catch (Exception e)
+            {
+                TempData["ErrorMessage"] = e.Message;
+            }
             return PartialView("_CashierData", order);
         }
 
