@@ -136,23 +136,31 @@ namespace ClickAndCollect.DAL
 
                     while (await reader.ReadAsync())
                     {
-                        if (order == null)
+                        try
                         {
-                            order = new Order
-                            (
-                                reader.GetInt32(orderIdOrd),
-                                new Client(reader.GetString(clientFirstnameOrd), reader.GetString(clientLastnameOrd))
-                            );
+                            if (order == null)
+                            {
+                                order = new Order
+                                (
+                                    reader.GetInt32(orderIdOrd),
+                                    new Client(reader.GetString(clientFirstnameOrd), reader.GetString(clientLastnameOrd))
+                                );
+                            }
+
+                            Product p = new Product
+                            {
+                                Name     = reader.GetString(productNameOrd),
+                                ImageUrl = reader.GetString(productImageOrd),
+                                Category = new Category(reader.GetString(categoryNameOrd))
+                            };
+
+                            order.Lines.Add(new OrderLine { Product = p, Quantity = reader.GetInt32(quantityOrd) });
                         }
-
-                        Product p = new Product
+                        catch (ArgumentException ex)
                         {
-                            Name = reader.GetString(productNameOrd),
-                            ImageUrl = reader.GetString(productImageOrd),
-                            Category = new Category(reader.GetString(categoryNameOrd))
-                        };
-
-                        order.Lines.Add(new OrderLine { Product = p, Quantity = reader.GetInt32(quantityOrd) });
+                            throw new InvalidOperationException(
+                                $"Données invalides pour la commande id={reader.GetInt32(orderIdOrd)} : {ex.Message}", ex);
+                        }
                     }
                 }
             }
@@ -192,20 +200,25 @@ namespace ClickAndCollect.DAL
 
                     while (await reader.ReadAsync())
                     {
-                        if (order == null)
+                        try
                         {
-                            order = new Order
-                            (
-                                reader.GetInt32(orderIdOrd),
-                                reader.GetInt32(cratesUsedOrd),
-                                new Client(reader.GetString(clientFirstnameOrd), reader.GetString(clientLastnameOrd))
-                            );
-                        }
+                            if (order == null)
+                            {
+                                order = new Order
+                                (
+                                    reader.GetInt32(orderIdOrd),
+                                    reader.GetInt32(cratesUsedOrd),
+                                    new Client(reader.GetString(clientFirstnameOrd), reader.GetString(clientLastnameOrd))
+                                );
+                            }
 
-                        // The Product object calls the constructor
-                        // with the price only, because for the bill,
-                        // only the price is needed
-                        order.Lines.Add(new OrderLine(new Product(reader.GetDecimal(productPriceOrd)), reader.GetInt32(quantityOrd)));
+                            order.Lines.Add(new OrderLine(new Product(reader.GetDecimal(productPriceOrd)), reader.GetInt32(quantityOrd)));
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            throw new InvalidOperationException(
+                                $"Données invalides pour la commande id={reader.GetInt32(orderIdOrd)} : {ex.Message}", ex);
+                        }
                     }
                 }
             }
@@ -295,19 +308,27 @@ namespace ClickAndCollect.DAL
 
                 if (!reader.IsDBNull(olIdOrd))
                 {
-                    var product = new Product(
-                        reader.GetInt32(pIdOrd),
-                        reader.GetString(pNameOrd),
-                        null,
-                        reader.GetDecimal(pPriceOrd),
-                        reader.GetString(pImgOrd),
-                        null,
-                        null);
+                    try
+                    {
+                        var product = new Product(
+                            reader.GetInt32(pIdOrd),
+                            reader.GetString(pNameOrd),
+                            null,
+                            reader.GetDecimal(pPriceOrd),
+                            reader.GetString(pImgOrd),
+                            null,
+                            null);
 
-                    order.Lines.Add(new OrderLine(
-                        reader.GetInt32(olIdOrd),
-                        reader.GetInt32(olQtyOrd),
-                        product));
+                        order.Lines.Add(new OrderLine(
+                            reader.GetInt32(olIdOrd),
+                            reader.GetInt32(olQtyOrd),
+                            product));
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        throw new InvalidOperationException(
+                            $"Données invalides pour une ligne de la commande id={orderId} : {ex.Message}", ex);
+                    }
                 }
             }
 

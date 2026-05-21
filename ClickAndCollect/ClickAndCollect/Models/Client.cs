@@ -5,11 +5,25 @@ namespace ClickAndCollect.Models
 {
     public class Client : User
     {
-        public string Firstname { get; set; }
+        private string _firstname = string.Empty;
+        public string Firstname
+        {
+            get => _firstname;
+            set => _firstname = !string.IsNullOrWhiteSpace(value)
+                ? value
+                : throw new ArgumentException("Le prénom ne peut pas être vide.");
+        }
 
-        public string Lastname { get; set; }
+        private string _lastname = string.Empty;
+        public string Lastname
+        {
+            get => _lastname;
+            set => _lastname = !string.IsNullOrWhiteSpace(value)
+                ? value
+                : throw new ArgumentException("Le nom ne peut pas être vide.");
+        }
 
-        public string PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; } = string.Empty;
 
         public Client()
         {
@@ -30,13 +44,15 @@ namespace ClickAndCollect.Models
             Lastname = lastname;
         }
 
-        // Constructor without the password parameter
-        // To display non-sensible informations
-        // Like the name in the order dashboard
-        public Client(int id, string firstname, string lastname, string phoneNumber): base(id)
+        public Client(int id): base(id)
         {
-            Firstname = firstname;
-            Lastname = lastname;
+
+        }
+
+        public Client(int id, string firstname, string lastname, string phoneNumber) : base(id)
+        {
+            Firstname   = firstname;
+            Lastname    = lastname;
             PhoneNumber = phoneNumber;
         }
 
@@ -47,11 +63,16 @@ namespace ClickAndCollect.Models
             return await userDAL.EmailExistsAsync(email);
         }
 
-        // --- Méthode d'instance : l'objet Client communique avec le DAL ---
+        // --- Méthodes d'instance : l'objet Client communique avec le DAL ---
 
         public async Task CreateAccount(IUserDAL userDAL)
         {
             await userDAL.CreateAsync(this);
+        }
+
+        public async Task<List<Order>> GetOrdersAsync(IOrderDAL orderDAL)
+        {
+            return await orderDAL.GetOrdersByClientAsync(Id);
         }
     }
 }

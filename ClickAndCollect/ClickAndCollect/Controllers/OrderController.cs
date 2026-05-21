@@ -149,8 +149,10 @@ namespace ClickAndCollect.Controllers
             if (AccountController.IsEmployee(HttpContext.Session))
                 return RedirectToAction("Index", "Home");
 
-            int clientId = HttpContext.Session.GetInt32(AccountController.SessionKeyId)!.Value;
-            List<Order> orders = await Order.GetOrdersByClientAsync(_orderDAL, clientId);
+            int    clientId  = HttpContext.Session.GetInt32(AccountController.SessionKeyId)!.Value;
+
+            var client = new Client(clientId);
+            List<Order> orders = await client.GetOrdersAsync(_orderDAL);
 
             return View(orders);
         }

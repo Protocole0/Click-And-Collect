@@ -221,11 +221,6 @@ namespace ClickAndCollect.Models
             return await orderDAL.GetAllOrdersAsync(status, storeId, bookDate);
         }
 
-        public static async Task<List<Order>> GetOrdersByClientAsync(IOrderDAL orderDAL, int clientId)
-        {
-            return await orderDAL.GetOrdersByClientAsync(clientId);
-        }
-
         public static async Task<Order> GetOrderForChecklistAsync(IOrderDAL orderDAL, int orderId)
         {
             return await orderDAL.GetOrderForChecklistAsync(orderId);

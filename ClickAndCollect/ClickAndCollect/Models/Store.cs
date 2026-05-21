@@ -5,22 +5,46 @@ namespace ClickAndCollect.Models
     public class Store
     {
         private int _storeId;
-        public int StoreId { get => _storeId; set => _storeId = value; }
+        public int StoreId { 
+            get => _storeId; 
+            set => _storeId = value; 
+        }
 
         private string _name;
-        public string Name { get => _name; set => _name = value; }
+        public string Name { 
+            get => _name; 
+            set => _name = value; 
+        }
 
         private string _streetName;
-        public string StreetName { get => _streetName; set => _streetName = value; }
+        public string StreetName { 
+            get => _streetName; 
+            set => _streetName = value; 
+        }
 
         private string _streetNumber;
-        public string StreetNumber { get => _streetNumber; set => _streetNumber = value; }
+        public string StreetNumber { 
+            get => _streetNumber; 
+            set => _streetNumber = value; 
+        }
 
         private string _city;
-        public string City { get => _city; set => _city = value; }
+        public string City { 
+            get => _city; 
+            set => _city = value; 
+        }
 
         private string _postalCode;
-        public string PostalCode { get => _postalCode; set => _postalCode = value; }
+        public string PostalCode { 
+            get => _postalCode; 
+            set => _postalCode = value; 
+        }
+
+        List<TimeSlot>? _timeSlots;
+        public List<TimeSlot>? TimeSlots { 
+            get => _timeSlots; 
+            set => _timeSlots = value;
+        }
 
         public Store() { _name = _streetName = _streetNumber = _city = _postalCode = string.Empty; }
 
@@ -32,6 +56,25 @@ namespace ClickAndCollect.Models
             _streetNumber = streetNumber;
             _city         = city;
             _postalCode   = postalCode;
+        }
+
+        public Store(int storeId, string name, string streetName, string streetNumber, string city, string postalCode, TimeSlot slots)
+        {
+            _storeId = storeId;
+            _name = name;
+            _streetName = streetName;
+            _streetNumber = streetNumber;
+            _city = city;
+            _postalCode = postalCode;
+            
+            AddTimeSlot(slots);
+        }
+
+        public void AddTimeSlot(TimeSlot slot)
+        {
+            if (_timeSlots == null)
+                _timeSlots = new List<TimeSlot>();
+            _timeSlots.Add(slot);
         }
 
         public string FullAddress() => $"{_streetName} {_streetNumber}, {_postalCode} {_city}";
