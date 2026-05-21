@@ -73,7 +73,17 @@ namespace ClickAndCollect.Controllers
                 return View(model);
             }
 
-            var client = new Client(0, model.Firstname, model.Lastname, model.Email, model.Password, model.PhoneNumber);
+            Client client;
+            try
+            {
+                client = new Client(0, model.Firstname, model.Lastname, model.Email, model.Password, model.PhoneNumber);
+            }
+            catch (ArgumentException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+
             await client.CreateAccount(_userDAL);
 
             await _emailService.SendWelcomeEmailAsync(model.Email, model.Firstname, model.Lastname, model.Email);

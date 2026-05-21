@@ -60,13 +60,21 @@ namespace ClickAndCollect.DAL
 
             while (await reader.ReadAsync())
             {
-                var slot = new TimeSlot(
-                    reader.GetInt32(idOrd),
-                    reader.GetDateTime(dateOrd),
-                    reader.GetTimeSpan(startOrd),
-                    reader.GetTimeSpan(endOrd));
-                slot.Reservations = reader.GetInt32(resOrd);
-                slots.Add(slot);
+                try
+                {
+                    var slot = new TimeSlot(
+                        reader.GetInt32(idOrd),
+                        reader.GetDateTime(dateOrd),
+                        reader.GetTimeSpan(startOrd),
+                        reader.GetTimeSpan(endOrd));
+                    slot.Reservations = reader.GetInt32(resOrd);
+                    slots.Add(slot);
+                }
+                catch (ArgumentException ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Données invalides pour le créneau id={reader.GetInt32(idOrd)} : {ex.Message}", ex);
+                }
             }
 
             return slots;
