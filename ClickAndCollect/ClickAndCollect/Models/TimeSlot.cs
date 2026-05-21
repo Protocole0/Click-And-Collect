@@ -1,26 +1,38 @@
 using ClickAndCollect.Interfaces;
-using System.Globalization;
 
 namespace ClickAndCollect.Models
 {
     public class TimeSlot
     {
         private int _timeSlotId;
-        public int TimeSlotId { 
-            get => _timeSlotId; 
-            set => _timeSlotId = value; 
+        public int TimeSlotId
+        {
+            get => _timeSlotId;
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("L'id d'un créneau horaire ne peut être négatif.");
+                _timeSlotId = value;
+            }
         }
 
         private DateTime _dateSlot;
-        public DateTime DateSlot { 
-            get => _dateSlot; 
-            set => _dateSlot = value; 
+        public DateTime DateSlot
+        {
+            get => _dateSlot;
+            set
+            {
+                if (value.Date < DateTime.Today)
+                    throw new ArgumentException("Une date de réservation ne peut pas être instanciée à un jour précédent aujourd'hui.");
+                _dateSlot = value;
+            }
         }
 
         private TimeSpan _startTime;
-        public TimeSpan StartTime { 
-            get => _startTime; 
-            set => _startTime = value; 
+        public TimeSpan StartTime
+        {
+            get => _startTime;
+            set => _startTime = value;
         }
 
         private TimeSpan _endTime;
@@ -39,16 +51,16 @@ namespace ClickAndCollect.Models
         public TimeSlot(int timeSlotId, DateTime dateSlot, TimeSpan startTime, TimeSpan endTime)
         {
             _timeSlotId = timeSlotId;
-            _dateSlot   = dateSlot;
-            _startTime  = startTime;
-            EndTime     = endTime;
+            _dateSlot = dateSlot;
+            _startTime = startTime;
+            EndTime = endTime;
         }
-        
+
         public TimeSlot(DateTime dateSlot, TimeSpan startTime, TimeSpan endTime)
         {
-            _dateSlot   = dateSlot;
-            _startTime  = startTime;
-            _endTime    = endTime;
+            _dateSlot = dateSlot;
+            _startTime = startTime;
+            _endTime = endTime;
         }
 
         // --- Méthodes statiques : la classe délègue au DAL ---
@@ -57,7 +69,7 @@ namespace ClickAndCollect.Models
 
         public bool IsAvailable => Reservations < MaxReservationsPerSlot;
 
-        public int PlacesLeft   => MaxReservationsPerSlot - Reservations;
+        public int PlacesLeft => MaxReservationsPerSlot - Reservations;
 
         // --- Méthodes statiques : la classe délègue au DAL puis applique les règles métier ---
 

@@ -8,19 +8,19 @@ namespace ClickAndCollect.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IUserDAL     _userDAL;
+        private readonly IUserDAL _userDAL;
         private readonly IEmailService _emailService;
 
-        public const string SessionKeyId        = "user_id";
+        public const string SessionKeyId = "user_id";
         public const string SessionKeyFirstname = "client_firstname";
-        public const string SessionKeyLastname  = "client_lastname";
-        public const string SessionKeyUserType  = "user_type";
-        public const string SessionKeyEmail     = "user_email";
-        public const string SessionKeyStoreId   = "store_id";
+        public const string SessionKeyLastname = "client_lastname";
+        public const string SessionKeyUserType = "user_type";
+        public const string SessionKeyEmail = "user_email";
+        public const string SessionKeyStoreId = "store_id";
 
         public AccountController(IUserDAL userDAL, IEmailService emailService)
         {
-            _userDAL      = userDAL;
+            _userDAL = userDAL;
             _emailService = emailService;
         }
 
@@ -113,14 +113,14 @@ namespace ClickAndCollect.Controllers
 
         private void StoreUserInSession(User user)
         {
-            HttpContext.Session.SetInt32(SessionKeyId,        user.Id);
+            HttpContext.Session.SetInt32(SessionKeyId, user.Id);
             HttpContext.Session.SetString(SessionKeyUserType, user.UserType);
-            HttpContext.Session.SetString(SessionKeyEmail,    user.Email);
+            HttpContext.Session.SetString(SessionKeyEmail, user.Email);
 
             if (user is Client client)
             {
                 HttpContext.Session.SetString(SessionKeyFirstname, client.Firstname);
-                HttpContext.Session.SetString(SessionKeyLastname,  client.Lastname);
+                HttpContext.Session.SetString(SessionKeyLastname, client.Lastname);
             }
             else if (user is Cashier cashier && cashier.Store != null)
             {

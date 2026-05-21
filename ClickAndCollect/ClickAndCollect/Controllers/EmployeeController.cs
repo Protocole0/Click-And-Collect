@@ -54,24 +54,32 @@ namespace ClickAndCollect.Controllers
             Order order = null;
             if (HttpContext.Session.GetString("user_type") == "orderpicker")
             {
-                order = await Order.GetOrderForChecklistAsync(_orderDAL, orderId);
-                return PartialView("_OrderPickerData", order);
+                try
+                {
+                    order = await Order.GetOrderForChecklistAsync(_orderDAL, orderId);
+                    return PartialView("_OrderPickerData", order);
+                }
+                catch (Exception e)
+                {
+                    TempData["ErrorMessage"] = e.Message;
+                }
             }
             order = await Order.GetOrderForBillAsync(_orderDAL, orderId);
             return PartialView("_CashierData", order);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ValidatePreparation(int orderId, int cratesUsed, List<int> checkedProducts)
         {
-            Order orderPrepared = await Order.GetOrderForChecklistAsync(_orderDAL, orderId);
-
-            int checkedProductsCount = checkedProducts.Count();
             try
             {
-                // Make a try-catch because de the CratesUsed property could not be less than 1
+                // Make a try-catch because the class Order throws
+                // a lot of exceptions if its properties are wrong
+                Order orderPrepared = await Order.GetOrderForChecklistAsync(_orderDAL, orderId);
+                int checkedProductsCount = checkedProducts.Count();
+                // Make a try-catch because the CratesUsed property could not be less than 1
                 bool success = await orderPrepared.UpdateCratesUsed(_orderDAL, cratesUsed, checkedProductsCount);
-
                 TempData["SuccessMessage"] = $"La commande n°{orderPrepared.Id} de {orderPrepared.Client!.Firstname} {orderPrepared.Client.Lastname} a bien été validée et est prête au retrait !";
             }
             catch (Exception e)
@@ -81,18 +89,16 @@ namespace ClickAndCollect.Controllers
 
             return RedirectToAction(nameof(Dashboard));
         }
-       
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ValidatePickUp(int orderId, int cratesReturned)
         {
-            Order orderPickedUp = await Order.GetOrderForBillAsync(_orderDAL, orderId);
-
             try
             {
+                Order orderPickedUp = await Order.GetOrderForBillAsync(_orderDAL, orderId);
                 bool success = await orderPickedUp.UpdateCratesReturned(_orderDAL, cratesReturned);
-
                 TempData["SuccessMessage"] = $"La commande n°{orderPickedUp.Id} de {orderPickedUp.Client!.Firstname} {orderPickedUp.Client.Lastname} a bien été retirée !";
-
                 await _emailService.SendOrderFinalBillAsync(orderPickedUp);
             }
             catch (Exception e)

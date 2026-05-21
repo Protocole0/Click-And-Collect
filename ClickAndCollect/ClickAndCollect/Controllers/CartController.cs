@@ -45,10 +45,10 @@ namespace ClickAndCollect.Controllers
 
             return Json(new
             {
-                success   = true,
+                success = true,
                 cartCount = cart.TotalItems(),
-                subTotal  = cart.TotalAmount().ToString("0.00"),
-                total     = (cart.TotalAmount() + Order.DefaultServiceFee).ToString("0.00")
+                subTotal = cart.TotalAmount().ToString("0.00"),
+                total = (cart.TotalAmount() + Order.DefaultServiceFee).ToString("0.00")
             });
         }
 
@@ -62,11 +62,11 @@ namespace ClickAndCollect.Controllers
             decimal serviceFee = cart.Lines.Any() ? Order.DefaultServiceFee : 0m;
             return Json(new
             {
-                success   = true,
+                success = true,
                 cartCount = cart.TotalItems(),
-                isEmpty   = !cart.Lines.Any(),
-                subTotal  = cart.TotalAmount().ToString("0.00"),
-                total     = (cart.TotalAmount() + serviceFee).ToString("0.00")
+                isEmpty = !cart.Lines.Any(),
+                subTotal = cart.TotalAmount().ToString("0.00"),
+                total = (cart.TotalAmount() + serviceFee).ToString("0.00")
             });
         }
     }

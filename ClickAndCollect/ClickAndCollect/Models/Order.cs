@@ -1,6 +1,6 @@
 using ClickAndCollect.Interfaces;
-using System.Text.Json;
 using ClickAndCollect.ViewModels;
+using System.Text.Json;
 
 namespace ClickAndCollect.Models
 {
@@ -17,7 +17,8 @@ namespace ClickAndCollect.Models
         public static decimal DefaultServiceFee = 5.95m;
 
         private int _id;
-        public int Id { 
+        public int Id
+        {
             get => _id;
             init
             {
@@ -28,8 +29,9 @@ namespace ClickAndCollect.Models
         }
 
         private DateTime _orderDate;
-        public DateTime OrderDate { 
-            get => _orderDate; 
+        public DateTime OrderDate
+        {
+            get => _orderDate;
             set
             {
                 if (value.Date > DateTime.Today)
@@ -38,18 +40,20 @@ namespace ClickAndCollect.Models
         }
 
         private int _cratesUsed;
-        public int CratesUsed { 
-            get => _cratesUsed; 
+        public int CratesUsed
+        {
+            get => _cratesUsed;
             set
             {
                 if (CratesUsed < 0)
                     throw new Exception("Le nombre de caisses utilisées ne peut être inférieure à 0.");
-                _cratesUsed = value; 
+                _cratesUsed = value;
             }
         }
 
         private int _cratesReturned;
-        public int CratesReturned { 
+        public int CratesReturned
+        {
             get => _cratesReturned;
             set
             {
@@ -60,7 +64,8 @@ namespace ClickAndCollect.Models
         }
 
         private OrderStatus _status;
-        public OrderStatus Status { 
+        public OrderStatus Status
+        {
             get => _status;
             set
             {
@@ -80,34 +85,31 @@ namespace ClickAndCollect.Models
         public List<OrderLine> Lines
         {
             get => _lines;
-            set 
+            set
             {
                 ArgumentNullException.ThrowIfNull(value);
-                _lines = value; 
+                _lines = value;
             }
         }
 
         private Client? _client;
-        public Client? Client {
+        public Client? Client
+        {
             get => _client;
-            set
-            {
-                _client = value;
-            }
+            set => _client = value;
         }
 
         private Store? _store;
-        public Store? Store {
+        public Store? Store
+        {
             get => _store;
-            set
-            {
-                _store = value;
-            }
+            set => _store = value;
         }
 
         private TimeSlot? _slot;
-        public TimeSlot? Slot { 
-            get => _slot; 
+        public TimeSlot? Slot
+        {
+            get => _slot;
             set
             {
                 _slot = value;
@@ -155,15 +157,15 @@ namespace ClickAndCollect.Models
                      OrderStatus status, Client client, List<OrderLine> lines,
                      Store store, TimeSlot slot)
         {
-            _id             = id;
-            _orderDate      = orderDate;
-            _cratesUsed     = cratesUsed;
+            _id = id;
+            _orderDate = orderDate;
+            _cratesUsed = cratesUsed;
             _cratesReturned = cratesReturned;
-            _status         = status;
-            _client         = client;
-            _lines          = lines;
-            _store          = store;
-            _slot           = slot;
+            _status = status;
+            _client = client;
+            _lines = lines;
+            _store = store;
+            _slot = slot;
         }
 
         // --- Méthodes de calculs ---
@@ -197,7 +199,7 @@ namespace ClickAndCollect.Models
             // Calculate total price of an order including
             // the price of products (GetHTTotalPrice), the crate fee and the service fee
             => TotalWithServiceFee() + (CratesUsed * 5.95m);
-        
+
 
         public void AddProduct(Product product, int quantity)
         {
@@ -260,7 +262,7 @@ namespace ClickAndCollect.Models
         {
             return await orderDAL.GetOrderForChecklistAsync(orderId);
         }
-        
+
         public static async Task<Order> GetOrderForBillAsync(IOrderDAL orderDAL, int orderId)
         {
             return await orderDAL.GetOrderForBillAsync(orderId);
@@ -277,13 +279,13 @@ namespace ClickAndCollect.Models
             if (CratesUsed < 1)
                 throw new Exception("Le nombre de caisses utilisées ne peut être inférieure à un. Pour la préparation d'une commande, vous avez besoin d'au moins une caisse.");
             // If all the products have been checked
-            if(Lines.Count() == checkedProductsCount)
+            if (Lines.Count() == checkedProductsCount)
             {
                 return await orderDAL.UpdateCratesUsed(Id, CratesUsed);
             }
             return false;
         }
-        
+
         public async Task<bool> UpdateCratesReturned(IOrderDAL orderDAL, int cratesReturned)
         {
             CratesReturned = cratesReturned;
