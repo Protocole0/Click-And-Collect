@@ -1,68 +1,100 @@
 ﻿@using ClickAndCollect.ViewModels;
+@using System.Globalization
 @model Order
 @{
     var totalItems = Model.TotalItems();
     var clientName = $"- {Model.Client.Firstname} {Model.Client.Lastname}";
     var clientPhone = Model.Client.PhoneNumber;
+    var baseTotalTTC = Model.GetTTCTotalPrice();
 }
 
 <form id="cashier-form" asp-action="ValidatePickUp" asp-route-orderId="@Model.Id" method="post">
-    <div class="modal-body px-5 pb-4 pt-4">
+    <div class="modal-body px-4 px-md-5 pb-4 pt-4">
 
         <div id="step-1-body" class="fade-in">
-            <h5 class="fw-bold text-dark mb-4 text-center mt-2">
-                <i class="bi bi-receipt text-success me-2"></i>Détails du paiement
-            </h5>
+            <div class="text-center mb-4">
+                <span class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                    <i class="bi bi-receipt fs-4"></i>
+                </span>
+                <h4 class="fw-bold text-dark mb-0">Détail du paiement</h4>
+            </div>
 
-            <div class="bg-light p-4 rounded-4 mb-4 border border-secondary border-opacity-10">
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Produits (@totalItems articles) HT</span>
-                    <span class="fw-medium text-dark">@Model.GetHTTotalPrice().ToString("0.00") €</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Consigne (@Model.CratesUsed caisses)</span>
-                    <span class="fw-medium text-dark">@((Model.CratesUsed * 5.95m).ToString("0.00")) €</span>
-                </div>
-                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom border-secondary border-opacity-25">
-                    <span class="text-muted">Frais de service</span>
-                    <span class="fw-medium text-dark">@Order.DefaultServiceFee.ToString("0.00") €</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-uppercase fw-bold text-success" style="letter-spacing: 1px;">Total dû</span>
-                    <span class="fs-3 fw-black text-success">@Model.GetTTCTotalPrice().ToString("0.00") €</span>
+            <div class="card border-0 shadow-sm rounded-4 mb-4 position-relative overflow-hidden">
+                <div class="position-absolute top-0 start-0 w-100 bg-success" style="height: 4px;"></div>
+                
+                <div class="card-body p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted fw-medium">Produits (@totalItems articles) HT</span>
+                        <span class="fw-bold text-dark fs-6">@Model.GetHTTotalPrice().ToString("0.00") €</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted fw-medium">Consigne (@Model.CratesUsed caisses)</span>
+                        <span class="fw-bold text-dark fs-6">@((Model.CratesUsed * 5.95m).ToString("0.00")) €</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted fw-medium">Frais de service</span>
+                        <span class="fw-bold text-dark fs-6">@Order.DefaultServiceFee.ToString("0.00") €</span>
+                    </div>
+
+                    <div id="deduction-row" class="d-flex justify-content-between align-items-center mb-3 d-none">
+                        <span class="fw-bold text-primary">
+                            <i class="bi bi-arrow-return-left me-1"></i> Retour (<span id="returned-crates-count">0</span>)
+                        </span>
+                        <span class="fw-bold text-primary fs-6" id="dynamic-deduction">- 0.00 €</span>
+                    </div>
+
+                    <hr class="border-secondary opacity-25" style="border-top-style: dashed !important; border-top-width: 2px; margin: 1.5rem 0;">
+                    
+                    <div id="total-due-block" class="d-flex justify-content-between align-items-center bg-success bg-opacity-10 p-3 rounded-3 transition-all">
+                        <span id="total-due-label" class="text-uppercase fw-bold text-success mb-0" style="letter-spacing: 0.5px;">Total à régler</span>
+
+                        <span class="fs-3 fw-black text-success" style="line-height: 1;" id="dynamic-final-total" data-basetotal="@baseTotalTTC.ToString(CultureInfo.InvariantCulture)">
+                            @baseTotalTTC.ToString("0.00") €
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <div class="card border-0 bg-info bg-opacity-10 rounded-4 shadow-sm">
+            <div class="card border border-primary border-opacity-25 bg-light rounded-4 shadow-sm transition-all card-hover">
                 <div class="card-body p-4 d-flex align-items-center">
-                    <div class="bg-white text-info rounded-circle d-flex align-items-center justify-content-center shadow-sm me-4" style="width: 55px; height: 55px;">
-                        <i class="bi bi-arrow-counterclockwise fs-3"></i>
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center shadow-sm me-4" style="width: 50px; height: 50px;">
+                        <i class="bi bi-box-arrow-in-down fs-4"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <label for="crates-returned" class="fw-bold text-dark mb-1 d-block fs-5">Caisses ramenées</label>
-                        <p class="text-muted small mb-0">Caisses rendues par le client aujourd'hui</p>
+                        <label for="crates-returned" class="fw-bold text-dark mb-1 d-block fs-6">Caisses ramenées</label>
+                        <p class="text-muted small mb-0" style="line-height: 1.2;">Combien de caisses le client rend-il ?</p>
                     </div>
-                    <div style="width: 120px;">
-                        <input type="number" name="cratesReturned" id="crates-returned" class="form-control form-control-lg text-center border-info border-opacity-50 shadow-sm rounded-3 fw-bold text-info" value="0" min="0" max="@Model.CratesUsed" required>
+                    <div style="width: 100px;">
+                        <input type="number" name="cratesReturned" id="crates-returned" class="form-control form-control-lg text-center border-primary border-opacity-50 shadow-sm rounded-3 fw-bold text-primary" value="0" min="0" required>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="step-2-body" class="d-none fade-in pt-3">
-            <div class="text-center mb-4">
-                <p class="text-muted px-3">Voulez-vous vraiment valider la remise et le paiement de cette commande ?</p>
+            <div class="text-center mb-5">
+                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="bi bi-exclamation-triangle fs-2"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Validation de l'encaissement</h5>
+                <p class="text-muted px-3">Voulez-vous vraiment clôturer cette commande et confirmer le paiement ?</p>
             </div>
 
             <div class="card border-0 bg-light rounded-4 shadow-sm mb-2 text-start">
                 <div class="card-body p-4">
-                    <div class="mb-4 pb-4 border-bottom border-secondary border-opacity-10">
-                        <small class="text-muted d-block mb-1">Commande</small>
-                        <span class="fw-bold text-dark fs-6">#@Model.Id @clientName</span>
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-10">
+                        <div>
+                            <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.7rem;">Commande</small>
+                            <span class="fw-bold text-dark fs-6">#@Model.Id</span>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.7rem;">Client</small>
+                            <span class="fw-bold text-dark fs-6">@clientName</span>
+                        </div>
                     </div>
-                    <div>
-                        <small class="text-muted d-block mb-1">Caisses retournées enregistrées</small>
-                        <span class="fw-bold text-dark fs-6" id="summary-crates-returned">0</span>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-medium">Caisses retournées</span>
+                        <span class="badge bg-primary rounded-pill fs-6 px-3 py-2" id="bill-crates-returned">0</span>
                     </div>
                 </div>
             </div>
@@ -70,18 +102,18 @@
 
     </div>
 
-    <div class="modal-footer border-0 px-5 pb-5 pt-0 d-flex flex-column gap-2 bg-white">
+    <div class="modal-footer border-0 px-4 px-md-5 pb-4 pt-0 d-flex flex-column gap-2 bg-white">
         <div id="step-1-footer" class="w-100 fade-in">
-            <button type="button" id="btn-show-confirm" class="btn btn-success w-100 py-3 fw-bold rounded-4 shadow-sm fs-5">
-                Valider le retrait
+            <button type="button" id="btn-show-confirm" class="btn btn-success w-100 py-3 fw-bold rounded-4 shadow-sm fs-5 d-flex justify-content-center align-items-center">
+                Aller à l'encaissement <i class="bi bi-arrow-right-short fs-3 ms-1"></i>
             </button>
         </div>
 
         <div id="step-2-footer" class="w-100 d-none fade-in d-flex flex-column gap-3">
-            <button type="submit" class="btn btn-success w-100 py-3 fw-bold rounded-4 shadow-sm fs-5">
-                Confirmer l'encaissement
+            <button type="submit" class="btn btn-success w-100 py-3 fw-bold rounded-4 shadow-sm fs-5 d-flex justify-content-center align-items-center">
+                <i class="bi bi-check2-circle me-2 fs-4"></i> Confirmer l'encaissement
             </button>
-            <button type="button" id="btn-back-to-summary" class="btn btn-light border w-100 py-3 fw-bold rounded-4 text-dark shadow-sm">
+            <button type="button" id="btn-back-to-bill" class="btn btn-light border w-100 py-3 fw-bold rounded-4 text-dark shadow-sm transition-all card-hover">
                 Retour
             </button>
         </div>
