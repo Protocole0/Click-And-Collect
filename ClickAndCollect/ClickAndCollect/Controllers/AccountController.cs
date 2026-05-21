@@ -126,9 +126,8 @@ namespace ClickAndCollect.Controllers
         {
             return GetUserType(session) switch
             {
-                "cashier"     => RedirectToAction("Cashier", "Employee"),
-                "orderpicker" => RedirectToAction("Index",   "Employee"),
-                _             => RedirectToAction("Index",   "Home")
+                "client"      => RedirectToAction("Index",   "Home"),
+                _ => RedirectToAction("Dashboard", "Employee")
             };
         }
 

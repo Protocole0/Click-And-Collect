@@ -39,12 +39,6 @@ namespace ClickAndCollect.Models
             set => _orderDate = value;
         }
 
-        private decimal _serviceFee;
-        public decimal ServiceFee { 
-            get => _serviceFee; 
-            set => _serviceFee = value; 
-        }
-
         private int _cratesUsed;
         public int CratesUsed { 
             get => _cratesUsed; 
@@ -79,17 +73,26 @@ namespace ClickAndCollect.Models
 
         public Order()
         {
-            _lines = new List<OrderLine>();
+            Lines = new List<OrderLine>();
         }
 
-        public Order(int id, Client client)
+        // Constructors for the GetOrderForChecklist method
+        // in the OrderDAL for the order picker data
+        public Order(int orderId, Client client)
         {
-            _id             = id;
-            _client         = client;
-            _cratesUsed     = 0;
-            _cratesReturned = 0;
-            _status         = OrderStatus.PENDING_PREPARATION;
-            _lines          = new List<OrderLine>();
+            Id = orderId;
+            Client = client;
+            _lines = new List<OrderLine>();
+        }
+        
+        // Constructors for the GetOrderForBill method
+        // in the OrderDAL for the cashier data
+        public Order(int orderId, int cratesUsed, Client client)
+        {
+            Id = orderId;
+            CratesUsed = cratesUsed;
+            Client = client;
+            _lines = new List<OrderLine>();
         }
 
         // Constructeur complet pour valider une commande client
@@ -119,8 +122,23 @@ namespace ClickAndCollect.Models
             _lines          = new List<OrderLine>();
         }
 
+        public decimal GetHTTotalPrice()
+        {
+            // Using of lambda expression in the LINQ Sum method
+            // to calculate total price of an order without
+            // including the crate fee and the service fee
+            return Lines.Sum(l => l.Quantity * l.Product.Price);
+        }
 
+        public decimal GetTTCTotalPrice()
+        {
+            // Calculate total price of an order including
+            // the price of products (GetHTTotalPrice), the crate fee and the service fee
+            decimal serviceFee = DefaultServiceFee;
+            decimal hTPrice = GetHTTotalPrice();
 
+            return hTPrice + (CratesUsed * 5.95m) + serviceFee;
+        }
 
         // --- Méthodes panier (session) ---
 
@@ -198,9 +216,9 @@ namespace ClickAndCollect.Models
 
         // --- Méthodes BD ---
 
-        public static async Task<List<OrderViewModel>> GetAllOrdersAsync(IOrderDAL orderDAL, OrderStatus status, int storeId)
+        public static async Task<List<OrderDisplayViewModel>> GetAllOrdersAsync(IOrderDAL orderDAL, OrderStatus status, int? storeId, DateTime bookDate)
         {
-            return await orderDAL.GetAllOrdersAsync(status, storeId);
+            return await orderDAL.GetAllOrdersAsync(status, storeId, bookDate);
         }
 
         public static async Task<List<Order>> GetOrdersByClientAsync(IOrderDAL orderDAL, int clientId)
@@ -208,9 +226,14 @@ namespace ClickAndCollect.Models
             return await orderDAL.GetOrdersByClientAsync(clientId);
         }
 
-        public static async Task<Order> GetOrderAsync(IOrderDAL orderDAL, int orderId)
+        public static async Task<Order> GetOrderForChecklistAsync(IOrderDAL orderDAL, int orderId)
         {
-            return await orderDAL.GetOrderAsync(orderId);
+            return await orderDAL.GetOrderForChecklistAsync(orderId);
+        }
+        
+        public static async Task<Order> GetOrderForBillAsync(IOrderDAL orderDAL, int orderId)
+        {
+            return await orderDAL.GetOrderForBillAsync(orderId);
         }
 
         public async Task PlaceOrder(IOrderDAL orderDAL)
@@ -218,13 +241,18 @@ namespace ClickAndCollect.Models
             await orderDAL.CreateAsync(this);
         }
 
-        public async Task<bool> UpdateCratesUsed(IOrderDAL orderDAL, int orderId, int cratesCount, int checkedProductsCount, OrderStatus status)
+        public async Task<bool> UpdateCratesUsed(IOrderDAL orderDAL, int orderId, int cratesCount, int checkedProductsCount)
         {
             if(Lines.Count() == checkedProductsCount && cratesCount > 0)
             {
-                return await orderDAL.UpdateCratesUsed(orderId, cratesCount, status);
+                return await orderDAL.UpdateCratesUsed(orderId, cratesCount);
             }
             return false;
+        }
+        
+        public async Task<bool> UpdateCratesReturned(IOrderDAL orderDAL, int orderId, int cratesCount)
+        {
+            return await orderDAL.UpdateCratesReturned(orderId, cratesCount);
         }
     }
 }
