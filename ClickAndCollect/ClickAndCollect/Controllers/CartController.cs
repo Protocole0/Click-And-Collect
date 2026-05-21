@@ -18,7 +18,7 @@ namespace ClickAndCollect.Controllers
         public IActionResult Add(int productId, int quantity, string name, string price, string? imageUrl)
         {
             decimal unitPrice = decimal.Parse(price, CultureInfo.InvariantCulture);
-            var product = new Product(productId, name, null, unitPrice, imageUrl, null);
+            var product = new Product(productId, name, unitPrice, imageUrl);
 
             Order cart = Order.GetFromSession(HttpContext.Session);
             cart.AddProduct(product, quantity);

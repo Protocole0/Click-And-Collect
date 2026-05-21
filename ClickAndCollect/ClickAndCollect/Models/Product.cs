@@ -72,6 +72,16 @@ namespace ClickAndCollect.Models
             _category = category;
         }
 
+        //constructeur utiliser par CartConroller
+        public Product(int id, string name, decimal price,
+                       string? imageUrl)
+        {
+            _productId       = id;
+            _name            = name;
+            _price           = price;
+            _imageUrl        = imageUrl;
+        }
+
         // Constructeur principal utilisé par ProductDAL
         public Product(int productId, string name, string? description, decimal price,
                        string? imageUrl, string? nutritionalInfo, Category? category = null)
