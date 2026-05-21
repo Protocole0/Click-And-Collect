@@ -62,7 +62,7 @@ namespace ClickAndCollect.Models
             return await categoryDal.GetAllAsync();
         }
 
-        public static async Task<Category?> GetById(int categoryId, ICategoryDAL categoryDal)
+        public static async Task<Category?> GetById(ICategoryDAL categoryDal, int categoryId)
         {
             return await categoryDal.GetByIdAsync(categoryId);
         }

@@ -110,14 +110,5 @@ namespace ClickAndCollect.Models
         {
             return await productDal.GetByIdAsync(id);
         }
-
-        // --- Méthode d'instance : l'objet Product communique avec la classe Category ---
-
-        public Category GetCategory()
-        {
-            if (_category == null)
-                throw new InvalidOperationException("La catégorie n'est pas chargée.");
-            return _category;
-        }
     }
 }
