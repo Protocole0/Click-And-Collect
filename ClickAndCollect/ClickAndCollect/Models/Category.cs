@@ -1,3 +1,4 @@
+using ClickAndCollect.DAL;
 using ClickAndCollect.Interfaces;
 
 namespace ClickAndCollect.Models
@@ -62,7 +63,7 @@ namespace ClickAndCollect.Models
             return await categoryDal.GetAllAsync();
         }
 
-        public static async Task<Category?> GetById(ICategoryDAL categoryDal, int categoryId)
+        public static async Task<Category?> GetById(int categoryId, ICategoryDAL categoryDal)
         {
             return await categoryDal.GetByIdAsync(categoryId);
         }
